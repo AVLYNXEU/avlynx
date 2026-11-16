@@ -1,0 +1,10 @@
+# Internal edition and company data never belong in this repository
+*internal*
+avlynx-library.json
+*brand-library*
+BAKED.txt
+COMPANY.txt
+EDITION.txt
+# Local files
+.DS_Store
+__pycache__/
