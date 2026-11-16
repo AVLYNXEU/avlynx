@@ -8,6 +8,7 @@ AVLYNX is a browser-based editor for AV system diagrams. Devices are placed from
 
 - **Online:** https://avlynxeu.github.io/avlynx/
 - **Offline:** download `avlynx.html` from the [latest release](https://github.com/avlynxeu/avlynx/releases/latest) and open it in a browser.
+- **News:** follow [AVLYNX on LinkedIn](https://www.linkedin.com/company/145449744/)
 
 AVLYNX is a single HTML file. It requires no installation, no server and no account, and it does not transmit drawings. Projects and the device library are stored in the browser.
 
