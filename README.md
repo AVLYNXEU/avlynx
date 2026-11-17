@@ -16,8 +16,9 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 
 **Drawing**
 - Device blocks with any number of inputs and outputs
-- 17 signal types with their own colours, including HDMI, DisplayPort, USB-C, SDI, HDBaseT, analog audio, Dante, NDI, USB, network, RS-232 and IR
+- 18 signal types with their own colours, including HDMI, DisplayPort, USB-C, SDI, HDBaseT, analog audio, Dante, NDI, USB, network, fiber (SFP), RS-232 and IR
 - Connection check: only matching signal types connect, outputs to inputs. Different video connectors require an adapter device
+- Up to two cables per audio or speaker connector, for example a stereo output to two loudspeakers
 - Right-angled or curved lines; every part of a right-angled line can be moved, and corners can be added
 - Automatic cable IDs per signal type, for example H001 and A001
 - Rooms as labelled frames; the room becomes the location of the devices inside it
@@ -33,8 +34,9 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 - File names generated from project name, drawing number, revision and date
 
 **Device library**
-- About 120 generic devices, including adapters
+- About 130 generic devices, including adapters and fiber extenders
 - Own groups, categories and devices; import and export as JSON, Excel or CSV
+- Device editor with inputs and outputs side by side, sorted by drag and drop
 - Favourites as references to library devices
 - Optional shared library on a web server, with a backup before every update and a warning before changed devices are replaced
 
