@@ -3,7 +3,7 @@
   AVLYNX – AV system diagram editor
   Created by Timo Schönmeier
   Copyright (c) 2026 Timo Schönmeier
-  Version 1.0
+  Version 1.2
   Licensed under the MIT License. See the LICENSE file.
 
   Third-party library used for the PDF export: jsPDF 4.2.1 (MIT licence). Excel and CSV files are written and read by AVLYNX itself.
@@ -157,6 +157,8 @@ main{flex:1; min-height:0; display:flex; position:relative}
 .nbody{fill:var(--block); stroke:var(--line); stroke-width:1.2}
 .node{cursor:move}
 .node.sel .nbody{stroke:var(--sel); stroke-width:2.5}
+.node.others .nbody{stroke-dasharray:6 4; stroke-width:1.6}
+.ntag{font-size:11.5px; font-style:italic; fill:var(--muted)}
 .nhead{fill:var(--head)}
 .nname{fill:var(--head-ink); font-weight:600; font-size:14px; pointer-events:none}
 .plabel{fill:var(--ink); font-family:"Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif; font-weight:500; font-size:12.5px; pointer-events:none}
@@ -178,6 +180,12 @@ main{flex:1; min-height:0; display:flex; position:relative}
 .rbox{fill:var(--panel); stroke-width:1.6; cursor:pointer}
 .rtag.sel .rbox{stroke-width:3.2}
 .rtext{fill:var(--ink); font-family:"Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif; font-size:11px; font-weight:500; pointer-events:none}
+.flag{fill:none; stroke-width:16px; stroke-linecap:round; stroke-linejoin:round; opacity:.5; pointer-events:none}
+.flag.warn{stroke:#f5b400} .flag.bad{stroke:#e53935}
+.fpill{stroke:#fff; stroke-width:1.5px; pointer-events:none} .fpill.warn{fill:#f5b400} .fpill.bad{fill:#d32f2f}
+.fbadge{pointer-events:none} .fbadge circle{stroke:#fff; stroke-width:2px} .fbadge.warn circle{fill:#f5b400} .fbadge.bad circle{fill:#d32f2f}
+.fbadge text{fill:#fff; font-size:13px; font-weight:800; text-anchor:middle}
+.cid.warn,.cid.bad{fill:#fff; stroke:none; font-weight:700} .cid.warn{fill:#3d2a00}
 .cid{fill:var(--ink); font-size:10px; font-weight:500; text-anchor:middle; paint-order:stroke; stroke:var(--paper); stroke-width:4px; stroke-linejoin:round; pointer-events:none}
 .gdot{fill:var(--dot)}
 /* toolbars */
@@ -306,6 +314,8 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
   #status{max-width:50%}
 }
 @media (prefers-reduced-motion:reduce){ #lib,#toast{transition:none} }
+#editor.project #edStatus,#editor.project label[for=edStatus],#editor.project details{display:none}
+#customBtn{width:100%; margin-top:6px}
 </style>
 </head>
 <body>
@@ -340,6 +350,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <div class="libhead"><h2>Devices</h2><button class="btn" id="libClose">Close</button></div>
     <div id="repBar" hidden><span id="repText"></span><button class="btn" id="repCancel">Cancel</button></div>
     <button class="btn primary" id="mgrBtn">Manage library</button>
+    <button class="btn" id="customBtn" title="A device for this drawing only. It is not saved in the library.">+ Custom device</button>
     <input type="search" id="libSearch" placeholder="Search devices" aria-label="Search devices">
     <div id="libList"></div>
   </aside>
@@ -921,11 +932,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 'use strict';
 if(!window.HTMLDialogElement||!window.PointerEvent){ document.body.style.padding='24px'; document.body.textContent='AVLYNX needs a current browser: Chrome, Edge or Firefox, or Safari 15.4 or newer.'; return; }
 // AVLYNX – created by Timo Schönmeier. Copyright (c) 2026 Timo Schönmeier.
-const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.1',year:2026});
+const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.2',year:2026});
 // Settings an organisation can set when it builds its own edition of this file.
 const EDITION=/*@EDITION@*/'';      // shown next to the version, for example "Example Ltd edition"
 const COMPANY=/*@COMPANY@*/'';      // company name pre-filled in new projects
 const BAKED=/*@BAKED_LIBRARY@*/null; // a device library built into the file: {stamp, groups}
+// features a company build can switch off, e.g. {libraryManager:false} when the library is maintained centrally
+const FEATURES=Object.freeze(Object.assign({libraryManager:true,example:true,customDevice:true},/*@FEATURES@*/{}));
 const LIBRARY_FILE='avlynx-library.json'; // optional file next to this page on the server; a newer one is offered as an update
 const NS='http://www.w3.org/2000/svg';
 const TYPES=[
@@ -946,11 +959,12 @@ const TYPES=[
   {id:'rs232',label:'RS-232',       color:'#0f766e', bidi:true, dash:'7 6'},
   {id:'ir',   label:'IR',           color:'#c81e5a', bidi:true, dash:'2 5'},
   {id:'fiber',label:'Fiber (SFP)',  color:'#eab308', bidi:true, dash:'16 4'},
-  {id:'cat',  label:'Cat link',     color:'#5b6b8c', dash:'2 5'}
+  {id:'cat',  label:'Cat link',     color:'#5b6b8c', dash:'2 5'},
+  {id:'power',label:'Power',        color:'#57534e', dash:'10 3 2 3'}
 ];
 const T=Object.fromEntries(TYPES.map(t=>[t.id,t]));
 // cable ID prefix per signal type, e.g. H001 for the first HDMI cable
-const PRE={hdmi:'H',dvi:'DV',dp:'DP',usbc:'UC',sdi:'SDI',vga:'V',hdbt:'HB',audio:'A',spk:'SP',dante:'D',ndi:'NDI',usb:'U',lan:'N',ctrl:'C',rs232:'RS',ir:'IR',fiber:'F',cat:'CL'};
+const PRE={hdmi:'H',dvi:'DV',dp:'DP',usbc:'UC',sdi:'SDI',vga:'V',hdbt:'HB',audio:'A',spk:'SP',dante:'D',ndi:'NDI',usb:'U',lan:'N',ctrl:'C',rs232:'RS',ir:'IR',fiber:'F',cat:'CL',power:'PW'};
 const retype=p=>{ if(p&&p.type==='ctrl'){ if(/^RS-?232/i.test(p.name)) p.type='rs232'; else if(/^IR\b/i.test(p.name)) p.type='ir'; } return p; };
 const P=(name,dir,type)=>({name,dir,type});
 const many=(n,f)=>Array.from({length:n},(_,i)=>f(i+1));
@@ -1089,7 +1103,9 @@ const GENERIC=[
   {cat:'Network and control', name:'Occupancy sensor', ports:[P('Contact','out','ctrl')]},
   {cat:'Network and control', name:'Relay module', ports:[P('LAN','in','lan'),...many(4,i=>P('Relay '+i,'out','ctrl'))]},
   {cat:'Network and control', name:'Lighting / blinds interface', ports:[P('LAN','in','lan'),P('Control','out','ctrl')]},
-  {cat:'Network and control', name:'Power distribution unit (LAN)', ports:[P('LAN','in','lan'),P('RS-232','in','rs232')]}
+  {cat:'Network and control', name:'Power distribution unit (LAN)', ports:[P('LAN','in','lan'),P('RS-232','in','rs232')]},
+  {cat:'Power', name:'Power supply', ports:[P('DC Out','out','power')]},
+  {cat:'Power', name:'Power supply (4 outputs)', ports:[P('DC Out 1','out','power'),P('DC Out 2','out','power'),P('DC Out 3','out','power'),P('DC Out 4','out','power')]}
 ].map(d=>Object.assign(d,{brand:'Generic'}));
 function defaultLib(){
   const lib=BAKED?cleanLib(JSON.parse(JSON.stringify(BAKED.groups))):[], put=(b,c,d)=>{ let g1=lib.find(x=>x.name===b); if(!g1) lib.push(g1={name:b,cats:[]}); let c1=g1.cats.find(x=>x.name===c); if(!c1) g1.cats.push(c1={name:c,devs:[]}); c1.devs.push(d); };
@@ -1099,7 +1115,7 @@ function defaultLib(){
 }
 // A newer version of this file can bring more generic devices. They are added to a stored library once, by name;
 // devices the user already has, edited or deleted earlier are left alone.
-const GEN_V=4;
+const GEN_V=5;
 function mergeGeneric(lib){
   let g1=lib.find(x=>x.name==='Generic'); if(!g1){ g1={name:'Generic',cats:[]}; lib.push(g1); }
   const have=new Set(g1.cats.flatMap(c=>c.devs.map(d=>d.name))); let added=0;
@@ -1110,7 +1126,8 @@ const W=184, HEAD=32, ROW=26, PAD=8, KEY='avplan.proto.v1';
 const $=id=>document.getElementById(id);
 const svg=$('cv'), world=$('world'), edgesG=$('edges'), nodesG=$('nodes'), tempG=$('temp'), grid=$('grid');
 const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-const DOC0=()=>({project:'',title:'',customer:'',site:'',number:'',rev:'A',by:'',date:today(),company:COMPANY,accent:'#0e6e7a',logo:'',logoW:0,logoH:0,page:'a3',legend:true,ids:true,route:'ortho',lgTitle:'Legend',lgNotes:'',lgLogo:true,lgDetails:true,lgAll:false});
+const ACCENT=/*@ACCENT@*/'#0e6e7a';
+const DOC0=()=>({project:'',title:'',customer:'',site:'',number:'',rev:'A',by:'',date:today(),company:COMPANY,accent:ACCENT,logo:'',logoW:0,logoH:0,page:'a3',legend:true,ids:true,route:'ortho',lgTitle:'Legend',lgNotes:'',lgLogo:true,lgDetails:true,lgAll:false,ext:{}});
 
 let state={sheets:[{id:'s1',name:'Sheet 1',nodes:[],edges:[],zones:[],texts:[]}],cur:0,nodes:[],edges:[],zones:[],locked:false,lib:defaultLib(),libLocked:true,libStamp:BAKED?BAKED.stamp:0,typesV:1,genV:GEN_V,guides:true,texts:[],pid:null,doc:DOC0()};
 let view={x:0,y:0,k:1}, sel=null, pending=null, activeType=null, g=null, drawZone=false, multi=[];
@@ -1129,6 +1146,7 @@ function useSheet(i){ const sh=state.sheets[i]; if(!Array.isArray(sh.texts)) sh.
 function forEachSheet(fn){ syncSheet(); const keep=state.cur; try{ state.sheets.forEach((sh,i)=>{ useSheet(i); RC=buildCache(); fn(sh,i); }); } finally{ useSheet(keep); RC=null; } }
 function anyContent(){ syncSheet(); return state.sheets.some(sh=>sh.nodes.length||sh.zones.length||(sh.texts||[]).length); }
 function persist(){
+  setTimeout(()=>emit('change'),0);
   try{ syncSheet(); localStorage.setItem(KEY,JSON.stringify(Object.assign({},state,{nodes:undefined,edges:undefined,zones:undefined,texts:undefined}))); persistWarned=false; }
   catch(e){ if(!persistWarned){ persistWarned=true; toast('The browser cannot store your changes: its storage is full or blocked. Save the project as a file.'); } }
 }
@@ -1177,8 +1195,10 @@ function groupDrag(base,e){
 }
 const SWATCH=[['#1d4ed8','Blue'],['#0f766e','Teal'],['#15803d','Green'],['#b45309','Amber'],['#b91c1c','Red'],['#7e22ce','Purple'],['#be185d','Pink'],['#475569','Slate']];
 const inkOn=hex=>{ const m=/^#([0-9a-f]{6})$/i.exec(hex||''); if(!m) return '#ffffff'; const v=parseInt(m[1],16); return (0.299*(v>>16&255)+0.587*(v>>8&255)+0.114*(v&255))>160?'#1b2430':'#ffffff'; };
-function roomOf(n,zs){ const cx=n.x+W/2, cy=n.y+geo(n).h/2, z=(zs||state.zones||[]).filter(q=>cx>=q.x&&cx<=q.x+q.w&&cy>=q.y&&cy<=q.y+q.h).sort((a,b)=>a.w*a.h-b.w*b.h)[0]; return z?z.name:''; }
-function locOf(n,zs){ const r=roomOf(n,zs), d=(n.loc||'').trim(); return r&&d?r+' / '+d:r||d; }
+function zoneOf(n,zs){ const cx=n.x+W/2, cy=n.y+geo(n).h/2; return (zs||state.zones||[]).filter(q=>cx>=q.x&&cx<=q.x+q.w&&cy>=q.y&&cy<=q.y+q.h).sort((a,b)=>a.w*a.h-b.w*b.h)[0]||null; }
+function roomOf(n,zs){ const z=zoneOf(n,zs); return z?z.name:''; }
+const roomQty=n=>{ const z=zoneOf(n); return z&&z.qty>1?z.qty:1; };
+function locOf(n,zs){ const z=zoneOf(n,zs), r=z?z.name+(z.qty>1?' (\u00d7 '+z.qty+')':''):'', d=(n.loc||'').trim(); return r&&d?r+' / '+d:r||d; }
 function geo(n){
   if(RC){ const c=RC.geo.get(n); if(c) return c; }
   let i=0,o=0; const pos=n.ports.map(p=>{ const r=p.dir==='in'?i++:o++; return {x:p.dir==='in'?0:W, y:HEAD+PAD+r*ROW+ROW/2}; }), out={pos, h:HEAD+PAD*2+Math.max(i,o,1)*ROW};
@@ -1392,10 +1412,15 @@ function routes(){
         const cc=[.5,.35,.65,.25,.75].map(t=>p[q][0]+(p[q+1][0]-p[q][0])*t), x=cc.find(x=>clear(x)&&xs.every(v=>Math.abs(v-x)>24)&&free(x,yy));
         if(q===j) cand=cc; if(x!==undefined){ j=q; y=yy; cand=cc; lx=x; break; } }
       if(lx===undefined){ const cc=[.5,.35,.65,.25,.75].map(t=>p[j][0]+(p[j+1][0]-p[j][0])*t); lx=cc.find(x=>free(x,y)); }
-      placed.push({x:lx===undefined?cand[0]:lx,y});
+      let fx=lx===undefined?cand[0]:lx, fy=y;
+      const lblHit=(x,y)=>state.nodes.some(n=>x+17>n.x&&x-17<n.x+W&&y+7>n.y&&y-7<n.y+geo(n).h);
+      if(lblHit(fx,fy)){ const vv=[]; for(let q=0;q<p.length-1;q++) if(p[q][0]===p[q+1][0]&&p[q][1]!==p[q+1][1]) vv.push(q);
+        vv.sort((u,v)=>Math.abs(p[v+1][1]-p[v][1])-Math.abs(p[u+1][1]-p[u][1]));
+        for(const q of vv){ const vx=p[q][0], vy=(p[q][1]+p[q+1][1])/2, c=[vx+21,vx-21].find(x=>!lblHit(x,vy)&&free(x,vy)); if(c!==undefined){ fx=c; fy=vy; break; } } }
+      placed.push({x:fx,y:fy});
       const A=absPort(r.e.a), sg=r.o.manual?r.e.segs:deriveSegs(p,A), pp=r.o.manual?p:segPts(sg,A,absPort(r.e.b));
       const handles=sg.map((v,k)=>{ const q0=pp[k+1], q1=pp[k+2]; return {k,x:(q0[0]+q1[0])/2,y:(q0[1]+q1[1])/2,axis:k%2?'y':'x',len:Math.abs(q1[0]-q0[0])+Math.abs(q1[1]-q0[1])}; }).filter(hd=>hd.len>=10);
-      m.set(r.e.id,{ops:orthoOps(p,vs,r.e.id),mid:{x:lx===undefined?cand[0]:lx,y},handle:handles[0]||null,handles,manual:!!r.o.manual}); }
+      m.set(r.e.id,{ops:orthoOps(p,vs,r.e.id),mid:{x:fx,y:fy},handle:handles[0]||null,handles,manual:!!r.o.manual}); }
     else if(r.ref) m.set(r.e.id,{ref:true,A:r.A,B:r.B,ops:[],mid:null,handle:null});
     else { const k=ctrl(r.A,r.B); m.set(r.e.id,{ops:[['M',r.A.x,r.A.y],['C',k.c1.x,k.c1.y,k.c2.x,k.c2.y,r.B.x,r.B.y]],mid:wireMid(r.A,r.B),handle:null}); }
   });
@@ -1443,6 +1468,10 @@ function legendTypes(){ return state.doc.lgAll?TYPES:usedTypes(); }
 function detailRows(){ const d=state.doc; return [['Project',d.project],['Drawing',d.title],['Customer',d.customer],['Site',d.site],['No.',d.number],['Rev.',d.rev],['By',d.by],['Date',d.date]].filter(r=>r[1]); }
 function usedTypes(){ const u=new Set(liveEdges().map(e=>e.type).concat(xl().map(x=>x.e.type))); return TYPES.filter(t=>u.has(t.id)); }
 
+let CABLE_CHECK=null; // fn({type, a:{model,name,mfr,port,dir}, b:{...}}) -> {level:'warn'|'bad', note} | null
+function endInfo(ref){ const n=nodeById(ref.n), p=n&&n.ports[ref.p]; return n&&p?{model:n.model||'',name:n.name,mfr:n.mfr||'',port:p.name,dir:p.dir}:null; }
+function cableFlag(e){ if(!CABLE_CHECK) return null; const a=endInfo(e.a), b=endInfo(e.b); if(!a||!b) return null;
+  try{ const f=CABLE_CHECK({type:e.type,a,b}); return f&&(f.level==='warn'||f.level==='bad')?{level:f.level,note:String(f.note||'')}:null; }catch(_){ return null; } }
 function render(){ RC=buildCache(); try{ renderNow(); } finally{ RC=null; } }
 let rqId=0; const rq=()=>{ if(!rqId) rqId=requestAnimationFrame(()=>{ rqId=0; render(); }); }; // while dragging: at most one redraw per frame
 function renderNow(){
@@ -1457,7 +1486,7 @@ function renderNow(){
   const zonesG=$('zones'); zonesG.replaceChildren();
   (state.zones||[]).forEach(z=>{
     const isSel=isSelected('zone',z.id), gz=el('g',{class:'zone'+(isSel?' sel':'')});
-    const rc=el('rect',{class:'zrect',x:z.x,y:z.y,width:z.w,height:z.h,rx:10}), lab=el('text',{class:'zlabel',x:z.x+12,y:z.y+21,'data-zone':z.id}); lab.textContent=cut(z.name,40);
+    const rc=el('rect',{class:'zrect',x:z.x,y:z.y,width:z.w,height:z.h,rx:10}), lab=el('text',{class:'zlabel',x:z.x+12,y:z.y+21,'data-zone':z.id}); lab.textContent=cut(z.name,40)+(z.qty>1?' \u00d7 '+z.qty:'');
     if(z.color){ rc.setAttribute('style','fill:'+z.color+';stroke:'+z.color); lab.setAttribute('style','fill:'+z.color); }
     gz.appendChild(rc); gz.appendChild(el('rect',{class:'zhit',x:z.x,y:z.y,width:z.w,height:z.h,rx:10,'data-zone':z.id})); gz.appendChild(lab); zonesG.appendChild(gz);
   });
@@ -1468,28 +1497,33 @@ function renderNow(){
   $('empty').hidden=!!(state.nodes.length||state.zones.length||state.texts.length||drawZone);
   $('guideBtn').setAttribute('aria-pressed',String(!!state.guides)); $('guideBtn').title=state.guides?'Alignment guides are on: moving objects snap to the edges and centres of other objects':'Alignment guides are off';
   const R=routes();
-  const cids=[];
+  const cids=[], flags=[];
   liveEdges().forEach(e=>{
     const r=R.get(e.id), t=T[e.type]||T.hdmi;
     if(cull){ const A=absPort(e.a), B=absPort(e.b); if(Math.max(A.x,B.x)<vx0||Math.min(A.x,B.x)>vx1||Math.max(A.y,B.y)<vy0||Math.min(A.y,B.y)>vy1) return; }
     if(r.ref){ drawRefTags(e,r,t); return; }
     const d=opsToD(r.ops);
     edgesG.appendChild(el('path',{class:'case',d}));
+    const fl=cableFlag(e); if(fl) edgesG.appendChild(el('path',{class:'flag '+fl.level,d}));
     if(isSelected('edge',e.id)) edgesG.appendChild(el('path',{class:'glow',d}));
     const w=el('path',{class:'wire',d,stroke:t.color,'stroke-linejoin':'round'}); if(t.dash) w.setAttribute('stroke-dasharray',t.dash);
-    edgesG.appendChild(w); edgesG.appendChild(el('path',{class:'hit',d,'data-edge':e.id}));
-    if(state.doc.ids&&!lod){ const tx=el('text',{class:'cid',x:r.mid.x,y:r.mid.y+3.5}); tx.textContent=cableId(e); cids.push(tx); }
+    edgesG.appendChild(w); { const hp=el('path',{class:'hit',d,'data-edge':e.id}); if(fl){ const tt=el('title',{}); tt.textContent=fl.note; hp.appendChild(tt); } edgesG.appendChild(hp); }
+    if(fl){ const cw=state.doc.ids&&!lod?cableId(e).length*6.4+14:0, mx=r.mid.x, my=r.mid.y; // a coloured pill behind the cable ID and a round "!" badge beside it
+      if(cw) flags.push(el('rect',{class:'fpill '+fl.level,x:mx-cw/2,y:my-9,width:cw,height:18,rx:9}));
+      const bx=mx+(cw?cw/2+11:0), g=el('g',{class:'fbadge '+fl.level}); g.appendChild(el('circle',{cx:bx,cy:my,r:9})); const t=el('text',{x:bx,y:my+4.5}); t.textContent='!'; g.appendChild(t); flags.push(g); }
+    if(state.doc.ids&&!lod){ const tx=el('text',{class:'cid'+(fl?' '+fl.level:''),x:r.mid.x,y:r.mid.y+3.5}); tx.textContent=cableId(e); cids.push(tx); }
   });
-  cids.forEach(tx=>edgesG.appendChild(tx)); // cable IDs above all lines, so a line from the same connector never covers one
+  flags.forEach(x=>edgesG.appendChild(x)); cids.forEach(tx=>edgesG.appendChild(tx)); // cable IDs above all lines, so a line from the same connector never covers one
   xl().forEach(x=>drawXTag(x));
   state.nodes.forEach(n=>{
     const gg=G[n.id], isSel=isSelected('node',n.id);
     if(cull&&(n.x+W<vx0||n.x>vx1||n.y+gg.h<vy0||n.y>vy1)) return;
-    const grp=el('g',{class:'node'+(isSel?' sel':''),transform:'translate('+n.x+' '+n.y+')','data-node':n.id});
+    const grp=el('g',{class:'node'+(isSel?' sel':'')+(n.byOthers?' others':''),transform:'translate('+n.x+' '+n.y+')','data-node':n.id});
     grp.appendChild(el('rect',{class:'nbody',width:W,height:gg.h,rx:8}));
     grp.appendChild(el('path',{class:'nhead',d:'M0 8a8 8 0 0 1 8-8h'+(W-16)+'a8 8 0 0 1 8 8v'+(HEAD-8)+'h-'+W+'z'}));
     const nm=el('text',{class:'nname',x:12,y:21}); nm.textContent=cut(n.name,22); grp.appendChild(nm);
     if(n.color){ grp.children[1].setAttribute('style','fill:'+n.color); nm.setAttribute('style','fill:'+inkOn(n.color)); }
+    if(n.byOthers&&!lod){ const tg=el('text',{class:'ntag',x:4,y:gg.h+15}); tg.textContent='Supplied by others'; grp.appendChild(tg); }
     n.ports.forEach((p,i)=>{
       const q=gg.pos[i], t=T[p.type]||T.hdmi, ref={n:n.id,p:i};
       if(lod){ grp.appendChild(el('circle',{class:'pdot',cx:q.x,cy:q.y,r:6.5,fill:t.color})); return; }
@@ -1569,7 +1603,7 @@ function renderNow(){
     legendTypes().forEach(t=>{ const sw=h('i'); if(t.dash) sw.className=t.dash[0]==='2'?'dot':'dash'; const r=h('div',{className:'lrow'},[sw,t.label]); r.style.setProperty('--c',t.color); lg.appendChild(r); });
     if(dc.lgNotes) lg.appendChild(h('div',{className:'note',textContent:dc.lgNotes}));
   } else lg.classList.remove('on');
-  document.documentElement.style.setProperty('--brand',state.doc.accent||'#0e6e7a');
+  document.documentElement.style.setProperty('--brand',state.doc.accent||ACCENT);
 }
 
 let toastTimer;
@@ -1604,7 +1638,9 @@ function removeSel(){
   { const cid=curSid(); state.sheets.forEach(sh=>{ if(sh.id!==cid) sh.edges=sh.edges.filter(e=>!(isX(e)&&e.b.s===cid&&(ed.has(e.id)||nd.has(e.b.n)))); }); } state.zones=state.zones.filter(z=>!zn.has(z.id));
   multi=[]; sel=null; pending=null; save(); render();
 }
+let EXAMPLE_TPL=null;
 function example(){
+  if(EXAMPLE_TPL){ state.nodes=[]; state.edges=[]; state.zones=[]; state.texts=[]; insertRoom(clone(EXAMPLE_TPL)); return {nodes:state.nodes,edges:state.edges,zones:state.zones}; }
   const find=n=>GENERIC.find(d=>d.name===n), nodes=[], edges=[];
   const put=(name,x,y,label)=>{ const d=find(name), n={id:uid('n'),name:label||name,mfr:d.mfr||'',model:d.model||'',ports:clone(d.ports).map(retype),x,y}; nodes.push(n); return n; };
   const pi=(n,name)=>n.ports.findIndex(p=>p.name===name);
@@ -1805,7 +1841,7 @@ function devRow(g1,c,d,inFav){
   if(d.status==='draft') small.append(' · ',h('b',{textContent:'draft'}));
   const add=h('button',{className:'add',type:'button'},[d.name,small]); if(!pending) add.title='Click to add, or drag onto the drawing';
   add.addEventListener('pointerdown',e=>{ if(!pending&&!replacing&&e.pointerType!=='touch'&&e.button===0) libDragStart(e,d); });
-  add.addEventListener('click',()=>{ if(libDragDone){ libDragDone=false; return; } if(!pending) return replacing?replaceDevice(d):addDevice(d); if(state.libLocked) toast('This device has no connectors yet. Unlock the library under “Manage library” to define them.'); else openEditor(g1,c,d); });
+  add.addEventListener('click',()=>{ if(libDragDone){ libDragDone=false; return; } if(!pending) return replacing?replaceDevice(d):addDevice(d); if(!FEATURES.libraryManager) toast('This device has no connectors yet.'); else if(state.libLocked) toast('This device has no connectors yet. Unlock the library under “Manage library” to define them.'); else openEditor(g1,c,d); });
   const on=isFav(g1,d), star=h('button',{className:'fav',type:'button',textContent:on?'\u2605':'\u2606',title:on?'Remove from favourites':'Add to favourites'});
   star.setAttribute('aria-pressed',String(on)); star.setAttribute('aria-label',(on?'Remove from favourites: ':'Add to favourites: ')+d.name);
   star.addEventListener('click',()=>toggleFav(g1,d));
@@ -1813,7 +1849,7 @@ function devRow(g1,c,d,inFav){
 }
 function renderLib(){
   const list=$('libList'); list.replaceChildren();
-  const q=$('libSearch').value.trim().toLowerCase(), hit=(d,g1)=>!q||[d.name,d.mfr,d.model,d.desc,g1.name].filter(Boolean).join(' ').toLowerCase().includes(q);
+  const q=$('libSearch').value.trim().toLowerCase(), hit=(d,g1)=>!q||[d.name,d.mfr,d.model,d.desc,g1.name].concat(d.aliases||[]).filter(Boolean).join(' ').toLowerCase().includes(q);
   let any=false;
   const favs=favDevices().filter(x=>hit(x.d,x.g1));
   if(favs.length){ any=true;
@@ -1836,7 +1872,7 @@ function renderLib(){
     });
     list.appendChild(det);
   });
-  if(!any) list.appendChild(h('h3',{textContent:'No device found. Add it under “Manage library”.'}));
+  if(!any) list.appendChild(h('h3',{textContent:FEATURES.libraryManager?'No device found. Add it under “Manage library”.':'No device found. Use “+ Custom device” to add one to this drawing.'}));
 }
 $('libSearch').addEventListener('input',renderLib);
 // replace a device on the drawing by another one from the library; its cables move to matching connectors
@@ -1894,8 +1930,8 @@ $('zoomIn').addEventListener('click',()=>zoomStep(1)); $('zoomOut').addEventList
 $('mFile').addEventListener('click',()=>$('fileBtn').click()); $('mProj').addEventListener('click',()=>{ closeMenus(); openProject(); });
 $('keysBtn').addEventListener('click',()=>{ closeMenus(); $('keys').showModal(); }); $('keysClose').addEventListener('click',()=>$('keys').close());
 $('emptyLib').addEventListener('click',()=>{ if(window.matchMedia('(max-width:800px)').matches) $('lib').classList.add('open'); else { const s1=$('libSearch'); s1.focus(); s1.select(); } });
-$('emptyEx').addEventListener('click',()=>{ const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=[]; state.texts=[]; sel=null; multi=[]; pending=null; save(); fit(); });
-$('exBtn').addEventListener('click',()=>{ closeMenus(); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=[]; state.texts=[]; sel=null; pending=null; save(); fit(); });
+$('emptyEx').addEventListener('click',()=>{ const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; state.texts=[]; sel=null; multi=[]; pending=null; save(); fit(); });
+$('exBtn').addEventListener('click',()=>{ closeMenus(); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; state.texts=[]; sel=null; pending=null; save(); fit(); });
 let clearArmed=0;
 $('clearBtn').addEventListener('click',()=>{
   const b=$('clearBtn');
@@ -1993,7 +2029,7 @@ function infoData(){
   if(sel.kind==='node'){ const n=nodeById(sel.id); if(!n) return null;
     const ins=n.ports.filter(q=>q.dir==='in').length, used=new Set();
     liveEdges().forEach(e=>{ if(e.a.n===n.id) used.add(e.a.p); if(e.b.n===n.id) used.add(e.b.p); }); xl().forEach(x=>{ if(x.loc.n===n.id) used.add(x.loc.p); });
-    return {title:n.name,rows:[['Manufacturer',n.mfr],['Model',n.model],['Room',roomOf(n)],['Location',n.loc],['Connectors',ins+' in, '+(n.ports.length-ins)+' out'],['Connected',used.size+' of '+n.ports.length],['Notes',n.notes]]}; }
+    return {title:n.name,rows:[['Manufacturer',n.mfr],['Model',n.model],['Room',roomOf(n)],['Location',n.loc],['Connectors',ins+' in, '+(n.ports.length-ins)+' out'],['Connected',used.size+' of '+n.ports.length],['Supplied by',n.byOthers?'Others':''],['Notes',n.notes]]}; }
   if(sel.kind==='edge'){ const e=edgeById(sel.id); if(!e) return null; const t=T[e.type]||T.hdmi, x=isX(e)?xl().find(r=>r.e===e):null; let A,B;
     if(x){ const lp=portOf(x.loc), rp=xPort(x.rem); A={t:state.sheets[state.cur].name+': '+nodeById(x.loc.n).name+' / '+lp.name,d:lp.dir}; B={t:sheetOf(x.rem.s).name+': '+xNode(x.rem.s,x.rem.n).name+' / '+rp.name,d:rp.dir}; }
     else { const pa=portOf(e.a), pb=portOf(e.b); if(!pa||!pb) return null; A={t:nodeById(e.a.n).name+' / '+pa.name,d:pa.dir}; B={t:nodeById(e.b.n).name+' / '+pb.name,d:pb.dir}; }
@@ -2002,7 +2038,7 @@ function infoData(){
   if(sel.kind==='zone'){ const z=zoneById(sel.id); if(!z) return null;
     const inZ=n=>{ const cx=n.x+W/2, cy=n.y+geo(n).h/2; return (state.zones||[]).filter(q=>cx>=q.x&&cx<=q.x+q.w&&cy>=q.y&&cy<=q.y+q.h).sort((a,b)=>a.w*a.h-b.w*b.h)[0]===z; };
     const ids=new Set(state.nodes.filter(inZ).map(n=>n.id)), cab=liveEdges().filter(e=>ids.has(e.a.n)||ids.has(e.b.n)).length+xl().filter(x=>ids.has(x.loc.n)).length;
-    return {title:z.name||'Room',rows:[['Devices',ids.size],['Cables',cab]]}; }
+    return {title:z.name||'Room',rows:[['Quantity',z.qty>1?'\u00d7 '+z.qty:''],['Devices',ids.size],['Cables',cab]]}; }
   return null;
 }
 function renderInfo(){
@@ -2025,8 +2061,8 @@ $('dupBtn').addEventListener('click',()=>{
 });
 
 // edit a device or a connection
-const ZONE_F=[['name','Room name']];
-let prColor='', prHasColor=false, prLoop=null;
+const ZONE_F=[['name','Room name'],['qty','Quantity of this room (the lists count its devices this many times)']];
+let prColor='', prHasColor=false, prLoop=null, prOthers=null;
 function swatchRow(cur,label){
   prColor=cur||''; const wrap=h('div',{className:'swatches'}), btns=[];
   const mark=()=>btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===prColor)));
@@ -2081,7 +2117,7 @@ function openTextEditor(t){
   $('props').showModal(); ta.focus();
 }
 $('editBtn').addEventListener('click',()=>{
-  if(!sel) return; prCb=null; prLoop=null;
+  if(!sel) return; prCb=null; prLoop=null; prOthers=null;
   if(sel.kind==='text'){ const t=textById(sel.id); if(t) openTextEditor(t); return; }
   const kind=sel.kind, F=kind==='node'?NODE_F:kind==='zone'?ZONE_F:EDGE_F; prTarget=kind==='node'?nodeById(sel.id):kind==='zone'?zoneById(sel.id):edgeById(sel.id); if(!prTarget) return;
   $('prTitle').textContent=kind==='node'?'Edit device':kind==='zone'?'Edit room':'Edit connection'; prHasColor=kind!=='edge';
@@ -2089,6 +2125,7 @@ $('editBtn').addEventListener('click',()=>{
   F.forEach(([k,lab])=>{ const inp=h('input',{type:'text',value:prTarget[k]||'',id:'pr_'+k}); const l=h('label',{textContent:lab}); l.htmlFor='pr_'+k; prInputs[k]=inp; box.appendChild(h('div',null,[l,inp])); });
   if(kind==='node'&&prTarget.ports.some(p=>p.dir==='in')&&prTarget.ports.some(p=>p.dir==='out')){ prLoop=h('input',{type:'checkbox',checked:!!prTarget.loop}); box.appendChild(h('label',{className:'check'},[prLoop,'Allow connections between this device’s own outputs and inputs'])); }
   if(kind==='edge'){ fillCableTypes([prTarget.type]); prInputs.cable.setAttribute('list','cableTypes'); prInputs.cable.placeholder=prTarget.type==='fiber'?'e.g. multimode OM4, LC duplex':'e.g. HDMI 2.1 cable, 3 m'; }
+  if(kind==='node'){ prOthers=h('input',{type:'checkbox',checked:!!prTarget.byOthers}); box.appendChild(h('label',{className:'check'},[prOthers,'Supplied by others (dashed on the drawing, own column in the lists)'])); }
   if(kind==='node'){ const rm=roomOf(prTarget); prInputs.loc.placeholder=rm?'The room “'+rm+'” is added automatically':'e.g. Rack 1'; }
   if(prHasColor) box.appendChild(swatchRow(prTarget.color,kind==='node'?'Block colour':'Frame colour'));
   $('props').showModal();
@@ -2099,6 +2136,8 @@ $('prSave').addEventListener('click',()=>{
   for(const k in prInputs){ const v=prInputs[k].value.trim(); if(k==='name'&&!v) continue; prTarget[k]=v; }
   if(prHasColor){ if(prColor) prTarget.color=prColor; else delete prTarget.color; }
   if(prLoop){ if(prLoop.checked) prTarget.loop=true; else delete prTarget.loop; }
+  if(prOthers){ if(prOthers.checked) prTarget.byOthers=true; else delete prTarget.byOthers; }
+  if(sel&&sel.kind==='zone'){ const q=parseInt(prTarget.qty,10); if(q>1) prTarget.qty=Math.min(999,q); else delete prTarget.qty; }
   save(); $('props').close(); render();
 });
 
@@ -2242,6 +2281,8 @@ function importDevices(arr,dg,dc,official){
   return {added,updated,removed};
 }
 function openEditor(g1,c,dev){
+  if(!FEATURES.libraryManager) return;
+  $('editor').classList.remove('project');
   edCtx={g:g1,c,dev:dev||null};
   ed=dev?clone(dev):{name:'',mfr:g1.name==='Generic'?'':'',model:'',desc:'',status:'',ports:[P('HDMI In','in','hdmi'),P('HDMI Out','out','hdmi')]};
   if(ed.status==='pending') ed.status='draft';
@@ -2270,10 +2311,19 @@ $('edSave').addEventListener('click',()=>{
   const d=edClean(), err=$('edErr');
   if(!d.name){ err.textContent='Give the device a name.'; return; }
   if(!d.ports.length){ err.textContent='Add at least one connector.'; return; }
+  if(edCtx.project){ $('editor').close(); addDevice(d); toast('Added “'+d.name+'” to the drawing. It is not saved in the library.'); return; }
   if(edCtx.dev&&edCtx.c.devs.includes(edCtx.dev)) edCtx.c.devs[edCtx.c.devs.indexOf(edCtx.dev)]=d; else edCtx.c.devs.push(d);
   save(); renderLib(); renderMgr(); $('editor').close(); toast('Saved “'+d.name+'” in the library');
 });
 
+function openCustomDevice(){
+  if(!FEATURES.customDevice) return;
+  edCtx={project:true}; ed={name:'',mfr:'',model:'',desc:'',status:'',ports:[P('HDMI In','in','hdmi'),P('HDMI Out','out','hdmi')]};
+  $('editor').classList.add('project'); $('edTitle').textContent='Custom device for this drawing'; $('edSave').textContent='Add to drawing';
+  $('edErr').textContent=''; $('edJson').value=''; drawEditor(); $('lib').classList.remove('open'); $('editor').showModal();
+}
+$('customBtn').addEventListener('click',openCustomDevice);
+$('editor').addEventListener('close',()=>{ $('edSave').textContent='Save device'; });
 // library manager
 const mgrOpenSet=new Set(), mgrClosedCats=new Set(); let drag=null;
 const LOCK_ICON=open=>{ const s1=document.createElementNS(NS,'svg'); s1.setAttribute('viewBox','0 0 16 16'); s1.setAttribute('aria-hidden','true'); s1.appendChild(el('rect',{x:3,y:7,width:10,height:7,rx:1.5,fill:'currentColor'})); s1.appendChild(el('path',{d:open?'M5 7V4.5a3 3 0 0 1 5.8-1':'M5 7V4.5a3 3 0 0 1 6 0V7',fill:'none',stroke:'currentColor','stroke-width':1.6,'stroke-linecap':'round'})); return s1; };
@@ -2370,7 +2420,7 @@ function dragEnd(e){
 }
 $('mgrList').addEventListener('pointerup',dragEnd);
 $('mgrList').addEventListener('pointercancel',dragEnd);
-$('mgrBtn').addEventListener('click',()=>{ $('lib').classList.remove('open'); mgrMsg(state.libLocked?'The library is locked. Use the lock to edit it.':''); $('mgr').showModal(); renderMgr(); });
+$('mgrBtn').addEventListener('click',()=>{ if(!FEATURES.libraryManager) return; $('lib').classList.remove('open'); mgrMsg(state.libLocked?'The library is locked. Use the lock to edit it.':''); $('mgr').showModal(); renderMgr(); });
 $('mgrClose').addEventListener('click',()=>$('mgr').close());
 $('mgr').addEventListener('close',()=>{ if(!state.libLocked){ state.libLocked=true; save(); } }); // also on Esc
 $('mgCollapse').addEventListener('click',()=>{ const all=state.lib.flatMap(g1=>g1.cats), anyOpen=all.some(c=>!mgrClosedCats.has(c)); mgrClosedCats.clear(); if(anyOpen) all.forEach(c=>mgrClosedCats.add(c)); state.lib.forEach(g1=>mgrOpenSet.add(g1)); renderMgr(); });
@@ -2388,7 +2438,7 @@ $('mgExpXlsx').addEventListener('click',()=>{
 function parsePorts(str,dir,where){
   return String(str||'').split(/[;\n]+/).map(x=>x.trim()).filter(Boolean).map(x=>{
     const i=x.lastIndexOf(':'); if(i<1) throw new Error(where+'connector “'+x+'” needs a signal type, for example “HDMI In 1:hdmi”.');
-    const key=x.slice(i+1).trim().toLowerCase(), t=T[key]||T[{sfp:'fiber','sfp+':'fiber',fibre:'fiber','fiber optic':'fiber','fibre optic':'fiber',optical:'fiber',glasfaser:'fiber',lwl:'fiber'}[key]]||TYPES.find(v=>v.label.toLowerCase()===key||v.label.toLowerCase().replace(/ \(.*\)$/,'')===key);
+    const key=x.slice(i+1).trim().toLowerCase(), t=T[key]||T[{sfp:'fiber','sfp+':'fiber',fibre:'fiber','fiber optic':'fiber','fibre optic':'fiber',optical:'fiber',glasfaser:'fiber',lwl:'fiber',dc:'power',psu:'power','power supply':'power',strom:'power',netzteil:'power'}[key]]||TYPES.find(v=>v.label.toLowerCase()===key||v.label.toLowerCase().replace(/ \(.*\)$/,'')===key);
     if(!t) throw new Error(where+'unknown signal type “'+x.slice(i+1).trim()+'”. Allowed: '+TYPES.map(v=>v.id).join(', ')+'.');
     return P(x.slice(0,i).trim(),dir,t.id);
   });
@@ -2528,7 +2578,7 @@ async function saveFile(filename,data,mime){
 const UML={'ä':'ae','ö':'oe','ü':'ue','Ä':'Ae','Ö':'Oe','Ü':'Ue','ß':'ss'};
 const fclean=x=>String(x||'').replace(/[äöüÄÖÜß]/g,c=>UML[c]).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9\- ]+/g,'').trim().replace(/\s+/g,'-').replace(/-{2,}/g,'-').slice(0,60);
 function stampName(withTime){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return today()+(withTime?'_'+p(d.getHours())+p(d.getMinutes()):''); }
-function baseName(){ const d=state.doc, s=[fclean(d.project),fclean(d.number)].filter(Boolean).join('_'), r=fclean(d.rev); return (s||'AVLYNX')+(r?'_Rev-'+r:''); }
+function baseName(){ const d=state.doc, s=[fclean(d.project),fclean(d.number)].filter(Boolean).join('_'), r=fclean(d.rev); return (s||fclean(COMPANY)||'AVLYNX')+(r?'_Rev-'+r:''); }
 const docName=(kind,ext)=>baseName()+'_'+stampName()+'_'+kind+'.'+ext;
 function hasContent(){ syncSheet(); if(state.sheets.some(sh=>sh.nodes.length||(sh.texts||[]).length)) return true; toast('The drawing is empty. Add a device first.'); return false; }
 function equipmentRows(){
@@ -2542,8 +2592,8 @@ function equipmentRows(){
 }
 function summaryRows(){
   const m=new Map();
-  forEachSheet(()=>state.nodes.forEach(n=>{ const key=(n.mfr||'')+'|'+(n.model||n.name); const r=m.get(key)||{qty:0,mfr:n.mfr||'',model:n.model||'',desc:n.model?'':n.name}; r.qty++; m.set(key,r); }));
-  return [['Qty','Manufacturer','Model / part no.','Description']].concat([...m.values()].map(r=>[r.qty,r.mfr,r.model,r.desc]));
+  forEachSheet(()=>state.nodes.forEach(n=>{ const key=(n.byOthers?'o|':'')+(n.mfr||'')+'|'+(n.model||n.name); const r=m.get(key)||{qty:0,mfr:n.mfr||'',model:n.model||'',desc:n.model?'':n.name,by:n.byOthers?'Others':''}; r.qty+=roomQty(n); m.set(key,r); }));
+  return [['Qty','Manufacturer','Model / part no.','Description','Supplied by']].concat([...m.values()].map(r=>[r.qty,r.mfr,r.model,r.desc,r.by]));
 }
 function cableRows(){
   const tIdx=e=>TYPES.findIndex(t=>t.id===e.type), list=[];
@@ -2562,7 +2612,7 @@ function cableRows(){
 // the cables to order: one line per cable type and length
 function cableSummaryRows(){
   const m=new Map();
-  forEachSheet(()=>liveEdges().concat(state.edges.filter(e=>isX(e)&&portOf(e.a)&&xPort(e.b))).forEach(e=>{ const ct=(e.cable||'').trim(), ln=(e.len||'').trim(), key=e.type+'|'+ct.toLowerCase()+'|'+ln.toLowerCase(); const r=m.get(key)||{t:TYPES.findIndex(x=>x.id===e.type),qty:0,ct,sig:T[e.type].label,ln}; r.qty++; m.set(key,r); }));
+  forEachSheet(()=>liveEdges().concat(state.edges.filter(e=>isX(e)&&portOf(e.a)&&xPort(e.b))).forEach(e=>{ const ct=(e.cable||'').trim(), ln=(e.len||'').trim(), key=e.type+'|'+ct.toLowerCase()+'|'+ln.toLowerCase(), qn=nodeById(e.a.n)?roomQty(nodeById(e.a.n)):1; const r=m.get(key)||{t:TYPES.findIndex(x=>x.id===e.type),qty:0,ct,sig:T[e.type].label,ln}; r.qty+=qn; m.set(key,r); }));
   return [['Qty','Cable type','Signal','Length']].concat([...m.values()].sort((a,b)=>a.t-b.t||(a.ct?0:1)-(b.ct?0:1)||a.ct.localeCompare(b.ct)||a.ln.localeCompare(b.ln,undefined,{numeric:true})).map(r=>[r.qty,r.ct||'(cable type not set)',r.sig,r.ln]));
 }
 function projectRows(){ const d=state.doc; return [['Project',d.project],['Drawing title',d.title],['Customer',d.customer],['Site / room',d.site],['Drawing no.',d.number],['Revision',d.rev],['Drawn by',d.by],['Date',d.date],['Company',d.company],['Sheets',state.sheets.map(sh=>sh.name).join(', ')]]; }
@@ -2602,7 +2652,7 @@ $('xPdf').addEventListener('click',()=>{
   (state.zones||[]).forEach(z=>{
     const c=z.color?rgb(z.color):grey; pdf.setDrawColor(...c); pdf.setFillColor(...c.map(v=>Math.round(255-(255-v)*.07))); pdf.setLineWidth(Math.max(.2,1.6*s)); pdf.setLineDashPattern([9*s,6*s],0);
     pdf.roundedRect(X(z.x),Y(z.y),z.w*s,z.h*s,10*s,10*s,'FD'); pdf.setLineDashPattern([],0);
-    pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(13)); pdf.setTextColor(...c); pdf.text(pt(cut(z.name,40)),X(z.x+12),Y(z.y+21));
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(13)); pdf.setTextColor(...c); pdf.text(pt(cut(z.name,40)+(z.qty>1?' x '+z.qty:'')),X(z.x+12),Y(z.y+21));
   });
   const R=routes(), stroke=ops=>{ const segs=[]; let px=ops[0][1],py=ops[0][2];
     ops.slice(1).forEach(o=>{ if(o[0]==='L'){ segs.push([(o[1]-px)*s,(o[2]-py)*s]); px=o[1]; py=o[2]; } else { segs.push([(o[1]-px)*s,(o[2]-py)*s,(o[3]-px)*s,(o[4]-py)*s,(o[5]-px)*s,(o[6]-py)*s]); px=o[5]; py=o[6]; } });
@@ -2638,8 +2688,9 @@ $('xPdf').addEventListener('click',()=>{
   }); }
   state.nodes.forEach(n=>{
     const gg=geo(n), x=X(n.x), y=Y(n.y), w=W*s, r=8*s;
-    pdf.setFillColor(255,255,255); pdf.setDrawColor(...grey); pdf.setLineWidth(Math.max(.15,1.2*s));
-    pdf.roundedRect(x,y,w,gg.h*s,r,r,'FD');
+    pdf.setFillColor(255,255,255); pdf.setDrawColor(...grey); pdf.setLineWidth(Math.max(.15,(n.byOthers?1.6:1.2)*s));
+    if(n.byOthers) pdf.setLineDashPattern([6*s,4*s],0); pdf.roundedRect(x,y,w,gg.h*s,r,r,'FD'); pdf.setLineDashPattern([],0);
+    if(n.byOthers){ pdf.setFont('helvetica','italic'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...grey); pdf.text('Supplied by others',x+4*s,y+(gg.h+15)*s); }
     pdf.setFillColor(...(n.color?rgb(n.color):ink)); pdf.roundedRect(x,y,w,HEAD*s,r,r,'F'); pdf.rect(x,y+HEAD*s-r,w,r,'F');
     pdf.setTextColor(...(n.color?rgb(inkOn(n.color)):[255,255,255])); pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(13)); pdf.text(pt(cut(n.name,22)),x+12*s,y+21*s);
     pdf.setFont('helvetica','normal'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...ink);
@@ -2709,7 +2760,8 @@ function cleanDoc(d){
 function cleanLib(lib){
   return (Array.isArray(lib)?lib:[]).filter(g1=>g1&&typeof g1.name==='string'&&Array.isArray(g1.cats)).map(g1=>({name:g1.name,cats:g1.cats.filter(c=>c&&typeof c.name==='string'&&Array.isArray(c.devs)).map(c=>({name:c.name,devs:c.devs.filter(d=>d&&typeof d.name==='string'&&Array.isArray(d.ports)).map(d=>{
     const o={name:d.name,ports:d.ports.filter(p=>p&&T[p.type]&&(p.dir==='in'||p.dir==='out')).map(p=>P(String(p.name==null?'':p.name),p.dir,p.type))};
-    ['mfr','model','desc','status'].forEach(k=>{ if(typeof d[k]==='string'&&d[k]) o[k]=d[k]; }); if(d.loop===true) o.loop=true; return o;
+    ['mfr','model','desc','status'].forEach(k=>{ if(typeof d[k]==='string'&&d[k]) o[k]=d[k]; }); if(d.loop===true) o.loop=true;
+    if(Array.isArray(d.aliases)){ const al=d.aliases.filter(a=>typeof a==='string'&&a.trim()).map(a=>a.trim()).slice(0,20); if(al.length) o.aliases=al; } return o;
   })}))}));
 }
 function checkSheet(o){
@@ -2723,10 +2775,10 @@ function checkSheet(o){
   const edges=o.edges.filter(e=>e&&e.a&&e.b&&ids.has(e.a.n)&&ids.has(e.b.n));
   const portAt=r=>{ const n=o.nodes.find(x=>x.id===r.n); return n&&Number.isInteger(r.p)?n.ports[r.p]:null; };
   edges.forEach(e=>{ const pa=portAt(e.a), pb=portAt(e.b); if(pa&&pb) e.type=compat(pa.type,pb.type)?linkType(pa.type,pb.type):OLDPAIR[pairKey(pa.type,pb.type)]||''; });
-  const zones=(Array.isArray(o.zones)?o.zones:[]).filter(z=>z&&isFinite(z.x)&&isFinite(z.y)&&z.w>0&&z.h>0).map(z=>Object.assign({id:String(z.id||uid('z')),name:String(z.name||'Room'),x:+z.x,y:+z.y,w:+z.w,h:+z.h},typeof z.color==='string'?{color:z.color}:{}));
+  const zones=(Array.isArray(o.zones)?o.zones:[]).filter(z=>z&&isFinite(z.x)&&isFinite(z.y)&&z.w>0&&z.h>0).map(z=>Object.assign({id:String(z.id||uid('z')),name:String(z.name||'Room'),x:+z.x,y:+z.y,w:+z.w,h:+z.h},typeof z.color==='string'?{color:z.color}:{},Number.isInteger(+z.qty)&&+z.qty>1?{qty:Math.min(999,+z.qty)}:{}));
   if(ids.size!==o.nodes.length) throw new Error('This project contains the same device twice.');
   const isCol=c=>typeof c==='string'&&/^#[0-9a-f]{6}$/i.test(c), strs=(x,ks)=>ks.forEach(k=>{ if(x[k]!==undefined&&typeof x[k]!=='string') delete x[k]; });
-  o.nodes.forEach(n=>{ if(!isCol(n.color)) delete n.color; strs(n,['mfr','model','loc','notes']); if(n.loop!==true) delete n.loop; n.x=+n.x; n.y=+n.y; n.ports.forEach(p=>{ p.name=String(p.name==null?'':p.name); }); });
+  o.nodes.forEach(n=>{ if(!isCol(n.color)) delete n.color; strs(n,['mfr','model','loc','notes']); if(n.loop!==true) delete n.loop; if(n.byOthers!==true) delete n.byOthers; n.x=+n.x; n.y=+n.y; n.ports.forEach(p=>{ p.name=String(p.name==null?'':p.name); }); });
   zones.forEach(z=>{ if(!isCol(z.color)) delete z.color; });
   const okEnd=r=>{ const n=o.nodes.find(x=>x.id===r.n); return Number.isInteger(r.p)&&!!n.ports[r.p]; };
   const good=edges.filter(e=>T[e.type]&&typeof e.id==='string'&&okEnd(e.a)&&okEnd(e.b));
@@ -2877,6 +2929,68 @@ if(FONT_EMB&&window.FontFace&&document.fonts){ // text box fonts from the embedd
   Promise.all(Object.keys(fam).flatMap(k=>[['n','400'],['b','700']].map(([w,wt])=>{ const f=new FontFace(fam[k],b64bytes(FONT_EMB[k][w]).buffer,{weight:wt}); document.fonts.add(f); return f.load(); })))
     .then(()=>{ tmeasure.clear(); render(); }).catch(()=>{});
 }
+[[FEATURES.libraryManager,['mgrBtn']],[FEATURES.customDevice,['customBtn']],[FEATURES.example,['exBtn','emptyEx','wlExample']]].forEach(([on,ids])=>{ if(!on) ids.forEach(id=>{ const e=$(id); if(e){ e.hidden=true; e.style.display='none'; } }); });
+
+// ---- extension interface: lets an add-on (for example a quote module) read the drawing and add tools ----
+const EXT={};
+function emit(name,...a){ (EXT[name]||[]).forEach(f=>{ try{ f(...a); }catch(e){ console.error(e); } }); }
+function libFind(q){
+  for(const g1 of state.lib) for(const c of g1.cats) for(const d of c.devs){
+    if(q.model&&(d.model===q.model||(d.aliases||[]).includes(q.model))) return d;
+    if(q.lib&&!q.model&&d.name===q.lib&&(!q.group||g1.name===q.group)) return d; }
+  return q.lib&&!q.model?GENERIC.find(d=>d.name===q.lib)||null:null;
+}
+function insertRoom(t){ // t = {name, qty, devices:[{key, model|lib, label, col, row, byOthers}], links:[[key,port,key,port]]}
+  // layout: devices with a row share that row's height (grid); devices with only a column are stacked in that column.
+  // The room frame is drawn around whatever was placed, so every device always lies inside its room.
+  const made={}, list=[], missing=[];
+  (t.devices||[]).forEach(dv=>{ const d=libFind(dv); if(!d){ missing.push(dv.model||dv.lib); return; }
+    const n={id:uid('n'),name:dv.label||d.name,mfr:d.mfr||'',model:d.model||'',ports:clone(d.ports).map(retype),x:0,y:0};
+    if(d.loop) n.loop=true; if(dv.byOthers) n.byOthers=true; made[dv.key]=n; list.push({dv,n}); });
+  const CW=W+96, GAP=40, rowH={}, rows=[...new Set(list.filter(x=>Number.isInteger(x.dv.row)).map(x=>x.dv.row))].sort((a,b)=>a-b);
+  list.forEach(({dv,n})=>{ if(Number.isInteger(dv.row)) rowH[dv.row]=Math.max(rowH[dv.row]||0,geo(n).h); });
+  const rowY={}; let yy=0; rows.forEach(r=>{ rowY[r]=yy; yy+=rowH[r]+GAP; }); const yAt=r=>{ if(rowY[r]!=null) return rowY[r]; const lo=Math.floor(r), hi=Math.ceil(r); const a=rowY[lo]??0, b=rowY[hi]??(a+(rowH[lo]||0)+GAP); return a+(r-lo)*(b-a); };
+  const colY={};
+  list.forEach(({dv,n})=>{ const col=dv.col||0; n.x=col*CW;
+    if(dv.row!=null) n.y=yAt(dv.row);
+    else if(dv.col!=null){ n.y=Math.max(colY[col]||0,dv.y||0); }
+    else { n.x=dv.x||0; n.y=dv.y||0; }
+    colY[col]=Math.max(colY[col]||0,n.y+geo(n).h+GAP); });
+  // place to the right of the drawing, or below it once the drawing is wide
+  const has=state.nodes.length||(state.zones||[]).length, b0=has?bbox():null;
+  const bw=list.length?Math.max(...list.map(x=>x.n.x+W)):480, right=has&&b0.w+bw<2800;
+  const ox=!has?0:right?snap(b0.x0+b0.w+120):snap(b0.x0+24), oy=!has?0:right?snap(b0.y0+48):snap(b0.y0+b0.h+120);
+  list.forEach(({n})=>{ n.x=snap(ox+n.x); n.y=snap(oy+n.y); state.nodes.push(n); });
+  let links=0; (t.links||[]).forEach(([a,ap,bk,bp])=>{ const A=made[a], B=made[bk]; if(!A||!B) return;
+    const pa=A.ports.findIndex(p=>p.name===ap), pb=B.ports.findIndex(p=>p.name===bp); if(pa<0||pb<0) return;
+    const ea={n:A.id,p:pa}, eb={n:B.id,p:pb}; if(check(ea,eb)||linked(ea,eb)||fullMsg(ea)||fullMsg(eb)) return;
+    state.edges.push({id:uid('e'),a:ea,b:eb,type:linkType(A.ports[pa].type,B.ports[pb].type)}); links++; });
+  const xs=list.map(x=>x.n.x), ys=list.map(x=>x.n.y), x1=list.length?Math.max(...list.map(x=>x.n.x+W)):ox+480, y1=list.length?Math.max(...list.map(x=>x.n.y+geo(x.n).h)):oy+240;
+  const zx=snap((list.length?Math.min(...xs):ox)-40), zy=snap((list.length?Math.min(...ys):oy)-64);
+  const z={id:uid('z'),name:String(t.name||'Room').slice(0,60),x:zx,y:zy,w:snap(x1+40-zx),h:snap(y1+40-zy)}; if(t.qty>1) z.qty=Math.min(999,t.qty|0);
+  state.zones.push(z); sel={kind:'zone',id:z.id}; multi=[]; pending=null; save(); fit();
+  return {devices:list.length,links,missing};
+}
+function allZones(){ syncSheet(); return state.sheets.flatMap(sh=>sh.zones.map(z=>({sh,z}))); }
+window.AVLYNX=Object.freeze({
+  version:APP.version,
+  on(name,fn){ if(typeof fn==='function') (EXT[name]=EXT[name]||[]).push(fn); },
+  doc:()=>clone(state.doc),
+  rooms:()=>allZones().map(({sh,z})=>({id:z.id,sheet:sh.name,name:z.name,qty:z.qty||1})),
+  setRoomQty(id,q){ const r=allZones().find(x=>x.z.id===id); if(!r) return; q=Math.max(1,Math.min(999,parseInt(q,10)||1)); if(q>1) r.z.qty=q; else delete r.z.qty; save(); render(); },
+  equipment(){ const out=[]; forEachSheet(sh=>state.nodes.forEach(n=>{ const z=zoneOf(n); out.push({sheet:sh.name,room:z?z.name:'',roomId:z?z.id:'',roomQty:z&&z.qty>1?z.qty:1,name:n.name,mfr:n.mfr||'',model:n.model||'',byOthers:!!n.byOthers}); })); return out; },
+  cables(){ const out=[]; forEachSheet(sh=>state.edges.forEach(e=>{ const n=nodeById(e.a.n); const z=n?zoneOf(n):null; out.push({sheet:sh.name,type:e.type,signal:(T[e.type]||{}).label||e.type,cable:e.cable||'',len:e.len||'',room:z?z.name:'',roomQty:z&&z.qty>1?z.qty:1}); })); return out; },
+  library:()=>clone(state.lib),
+  insertRoom:t=>insertRoom(clone(t)),
+  setExample(t){ EXAMPLE_TPL=t?clone(t):null; },
+  getExt(k){ const x=state.doc.ext; return x&&typeof x==='object'&&!Array.isArray(x)&&x[k]!==undefined?clone(x[k]):undefined; },
+  setExt(k,v){ const x=state.doc.ext; state.doc.ext=Object.assign({},x&&typeof x==='object'&&!Array.isArray(x)?x:{}); if(v===undefined) delete state.doc.ext[k]; else state.doc.ext[k]=clone(v); save(); },
+  newProject(){ blankProject({page:state.doc.page}); },
+  setCableCheck(fn){ CABLE_CHECK=typeof fn==='function'?fn:null; render(); },
+  cableIssues(){ const out=[]; forEachSheet(sh=>state.edges.forEach(e=>{ const f=cableFlag(e); if(f) out.push({sheet:sh.name,id:cableId(e),level:f.level,note:f.note,a:endInfo(e.a),b:endInfo(e.b)}); })); return out; },
+  addButton(label,fn,o){ const b=h('button',{className:'btn'+(o&&o.primary?' primary':''),type:'button',textContent:label}); if(o&&o.title) b.title=o.title; if(o&&o.id) b.id=o.id; b.addEventListener('click',fn); $('fileBtn').before(b); return b; },
+  toast:m=>toast(String(m))
+});
 const stored=load();
 if(stored) state=stored;
 if(state.libBase&&(typeof state.libBase!=='object'||Array.isArray(state.libBase))) delete state.libBase;
@@ -2901,7 +3015,7 @@ window.addEventListener('resize',()=>render());
     btn.dataset.armed='1'; btn.textContent='Discard the last drawing?'; setTimeout(()=>{ delete btn.dataset.armed; btn.textContent=label; },3500);
   });
   fresh($('wlNew'),'New drawing',()=>blankProject(page()));
-  fresh($('wlExample'),'Show the example',()=>{ blankProject(page()); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; persist(); resetHistory(); fit(); });
+  fresh($('wlExample'),'Show the example',()=>{ blankProject(page()); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; sel=null; persist(); resetHistory(); fit(); });
   $('wlOpen').addEventListener('click',()=>{ close(); pMsg(''); renderProjects(); $('projects').showModal(); });
   wl.showModal(); (had?$('wlContinue'):$('wlNew')).focus();
 }
