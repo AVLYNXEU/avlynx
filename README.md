@@ -18,7 +18,7 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 - Device blocks with any number of inputs and outputs
 - 19 signal types with their own colours, including HDMI, DisplayPort, USB-C, SDI, HDBaseT, analog audio, Dante, NDI, USB, network, fiber (SFP), power, RS-232 and IR
 - Connection check: only matching signal types connect, outputs to inputs. Different video connectors require an adapter device
-- Up to two cables per audio or speaker connector, for example a stereo output to two loudspeakers
+- Up to two cables per analog audio connector; any number per speaker connector, with loudspeaker-to-loudspeaker chains for 70/100 V systems
 - Right-angled or curved lines; every part of a right-angled line can be moved, and corners can be added
 - Automatic cable IDs per signal type, for example H001 and A001
 - Rooms as labelled frames; the room becomes the location of the devices inside it
@@ -26,7 +26,10 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 - Devices marked "supplied by others"
 - Custom devices for a single drawing, without changing the library
 - Text boxes in three highly legible fonts, alignment guides, align and distribute
-- Several sheets per project, with cables that continue from one sheet to another
+- Several sheets per project, with cables that continue from one sheet to another; sheets can be duplicated
+- Select an area with Shift and drag; copy, cut and paste several devices, rooms and cables, also into another sheet or project
+- Edit several lines or devices at once: shape, corners and arrows for all selected lines, location and notes for all selected devices
+- Edit menu on right-click or long press, with the actions for the object or the empty place
 - Replace a device while its cables stay connected
 - Details panel with the attributes of the selected device, cable or room
 
@@ -39,8 +42,9 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 **Device library**
 - About 130 generic devices, including adapters and fiber extenders
 - Own groups, categories and devices; import and export as JSON, Excel or CSV
-- Device editor with inputs and outputs side by side, sorted by drag and drop
+- Device editor with inputs and outputs side by side, sorted by drag and drop; connectors can be duplicated, copied and pasted into other devices
 - Favourites as references to library devices
+- Jump from a device on the drawing straight to its library entry and update it
 - Optional shared library on a web server, with a backup before every update and a warning before changed devices are replaced
 
 ## Documentation

@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.3.0 – 24 November 2026
+
+**Working with several objects**
+- Select an area: hold Shift and drag a frame. Everything completely inside is selected, including the cables between the selected devices. With Ctrl (Cmd on a Mac) as well, the framed objects are added to the selection.
+- Copy, cut and paste with Ctrl+C, Ctrl+X and Ctrl+V (Cmd on a Mac). Cables come along when both of their devices are copied, and a room brings its devices and texts. Pasting puts the objects at the mouse pointer and keeps them selected, also in another sheet or project. Custom cable IDs are not copied, so every ID stays unique.
+- Duplicate (Ctrl+D) works for several objects and for rooms.
+- Duplicate sheet.
+- Several lines at once: a Shift-frame drawn only across lines selects those lines. Line ▾ then changes all of them (Curved, Add corner, Reset, Show as arrows), and dragging one round handle moves the same part of every selected line.
+- Edit devices: manufacturer, location detail, notes and "supplied by others" for several devices at once.
+- Rooms behave like the other objects: copy, cut, paste and duplicate take the devices and texts inside along. Delete removes only the frame, as before; right-click offers Delete room with its contents.
+
+**Navigation and editing**
+- Move the view with the middle mouse button: press the wheel and drag, anywhere on the drawing.
+- While a device, room, text, line or selection frame is dragged to the edge of the drawing area, the view moves along, so objects can be put down in a part that was not visible.
+- Speaker connectors take any number of cables (70 V and 100 V systems), and a loudspeaker can be connected on to the next one (input to input). Analog audio connectors keep the limit of two.
+- Connections between two connectors on the same side of neighbouring devices run around below the blocks instead of behind them.
+- Lines lead around device blocks that stand in the way, through a free gap or channel.
+- Cable IDs of lines that share their first part (several loudspeakers on one output) are placed along each line, so they no longer sit on top of each other.
+- Edit in the device library: from a device on the drawing straight to its library entry, unlocked for this change. After saving, the device on the drawing takes over the change and keeps its cables wherever a matching connector exists.
+- Device editor: duplicate a connector with ⧉ or Ctrl+D (the number in the name counts up); copy all inputs or outputs and paste them into another device.
+
+**Menus and buttons**
+- One menu style for right-click, line, sheet, library and connector actions, with shortcuts, check marks and keyboard control (arrow keys, Enter, Esc). On touch screens, press and hold for the right-click menu.
+- Right-click on an empty place: Paste, Select all, Add room here, Add text here, Show the whole drawing. Right-click on an object: the actions for that object only.
+- Signal type bar ("Highlight") shows only the signal types on the open sheet, so it always fits.
+- Cables: the selection bar shows Edit, Line ▾ and Delete. Line ▾ holds Curved, Add corner, Reset line, Show as arrows and Select all cables of the same type.
+- Sheets: double-click the open sheet to rename it; ⋯ next to it offers Rename, Duplicate and Delete sheet.
+- Library manager: + Group, Import, Export ▾ and ⋯ (collapse or expand all, undo library update, reset to defaults). Manage library is a small button next to the Devices heading.
+- The top bar button is called Projects. The More menu is grouped, with check marks for Curved lines and Details panel.
+- Dialog footers stay visible on small screens. Consistent wording: Edit cable, Title block and legend, New project, Open project. Hints say Click with a mouse and Tap on touch screens. Tooltips with shortcuts on the selection bar buttons.
+
+**Security**
+- Pasted objects are checked like a project file; pasted connectors keep only known signal types.
+- Limits against oversized or manipulated files: up to 5000 devices and 20000 cables per sheet, 256 connectors per device, coordinates within ±1,000,000 and length limits for all texts; the same limits apply to library imports.
+
 ## 1.2.0 – 20 November 2026
 
 - Rooms have a quantity, for example six identical huddle rooms drawn once. The room label shows "× 6", the location in the lists reads "Huddle room (× 6)", and the equipment summary and the cable summary count devices and cables with the quantity.

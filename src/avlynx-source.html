@@ -59,6 +59,25 @@ button{cursor:pointer}
 .btn.danger{color:var(--danger)}
 .menu{display:none; position:absolute; top:calc(100% + 4px); right:12px; min-width:220px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:4px; box-shadow:0 6px 20px rgba(10,16,24,.18)}
 .menu.on{display:block}
+.libnote2{font-size:13px; color:var(--muted); margin:0}
+.dlg>.foot{position:sticky; bottom:0; background:var(--panel); margin:0 -16px -16px; padding:12px 16px 16px; z-index:2}
+.menu button .ck{display:inline-block; width:20px; color:var(--sel); font-weight:600}
+.menu.hasck button{padding-left:30px}
+.menu.hasck button .ck{margin-left:-20px}
+.menu.ctx:focus{outline:none}
+.menu button.danger.armed{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.signals .chip[hidden]{display:none}
+.signals .none{align-self:center; color:var(--muted); font-size:13px}
+.sheetbar .tabm{padding:4px 7px; color:var(--muted)}
+#lib .libhead .btn{font-size:13px; padding:4px 9px}
+.foot .fx{margin-right:auto}
+svg.grabbing,svg.grabbing *{cursor:grabbing !important}
+.menu.ctx{position:fixed; top:0; left:0; right:auto; z-index:60; min-width:240px}
+.menu.ctx button{display:flex; justify-content:space-between; gap:24px}
+.menu.ctx button .k{color:var(--muted); font-size:12px}
+.menu.ctx button:disabled{opacity:.45; cursor:default}
+.menu.ctx hr{border:0; border-top:1px solid var(--line); margin:4px 2px}
+.mrect{fill:rgba(37,99,235,.08); stroke:#2563eb; stroke-width:1.2; stroke-dasharray:5 3; vector-effect:non-scaling-stroke}
 .menu button{display:block; width:100%; text-align:left; background:transparent; border:0; border-radius:5px; padding:9px 10px}
 .menu button:hover{background:var(--paper)}
 .menu button small{display:block; color:var(--muted); font-size:12px}
@@ -101,7 +120,7 @@ main{flex:1; min-height:0; display:flex; position:relative}
 .dev .fav:hover{border-color:var(--line)}
 .dev .fav[aria-pressed="true"]{color:#d97706}
 .favgrp>summary{color:var(--ink)}
-#mgrBtn{width:100%}
+#customBtn{width:100%}
 .brandgrp{border-top:1px solid var(--line); margin-top:10px}
 .brandgrp summary{cursor:pointer; font-weight:600; padding:9px 0 5px; display:flex; justify-content:space-between; gap:8px}
 .brandgrp summary span{color:var(--muted); font-weight:400; font-size:13px}
@@ -275,10 +294,14 @@ dialog::backdrop{background:rgba(10,16,24,.5)}
 .pcols{display:grid; grid-template-columns:1fr 1fr; gap:14px}
 .pcol h3{display:flex; justify-content:space-between; margin:0 0 4px; font-size:13px; font-weight:600; color:var(--ink)}
 .pcol h3 span{font-weight:400; color:var(--muted)}
+.pcol h3{align-items:center}
+.pcol h3 .pn{font-weight:400}
+.pcol h3 .pmenu{border:1px solid transparent; background:transparent; border-radius:6px; color:var(--muted); padding:0 7px; margin-left:4px; font-size:15px; line-height:22px}
+.pcol h3 .pmenu:hover{border-color:var(--line)}
 .plist{min-height:46px; border:1px dashed transparent; border-radius:8px}
 .plist.over{border-color:var(--line); background:rgba(127,127,127,.06)}
 .plist:empty::before{content:attr(data-empty); display:block; padding:12px 8px; font-size:13px; color:var(--muted)}
-.prow{display:grid; grid-template-columns:26px minmax(0,1fr) minmax(0,118px) 30px 30px; gap:5px; align-items:center; padding:5px 0; border-top:1px solid var(--line); background:var(--panel)}
+.prow{display:grid; grid-template-columns:26px minmax(0,1fr) minmax(0,118px) 30px 30px 30px; gap:5px; align-items:center; padding:5px 0; border-top:1px solid var(--line); background:var(--panel)}
 .prow input,.prow select{min-width:0}
 .prow button{border:1px solid var(--line); background:transparent; border-radius:6px; color:var(--muted); height:32px; padding:0}
 .prow .pgrip{border-color:transparent; cursor:grab; touch-action:none; font-size:18px; line-height:1}
@@ -321,8 +344,8 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
 <header class="bar">
   <span class="brand"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M4 3l9 7 3-1 3 1 9-7-1.5 12L25 23l-9 7-9-7-1.5-8z"/><path d="M11.5 16.5L16 23l4.5-6.5" fill="none" stroke="var(--panel)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="16.5" r="2.3" fill="#3b7cf0"/><circle cx="20.5" cy="16.5" r="2.3" fill="#e5484d"/></svg><h1>AVLYNX</h1></span>
   <span class="sp"></span>
-  <button class="btn" id="fileBtn" title="Save the project, open another one or start a new one (Ctrl+S saves)">Save / Open</button>
-  <button class="btn primary" id="expBtn" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+  <button class="btn" id="fileBtn" title="Save, open or start a project (Ctrl+S saves)">Projects</button>
+  <button class="btn primary" id="expBtn" aria-haspopup="true" aria-expanded="false" title="PDF drawing, Excel and CSV lists">Export ▾</button>
   <button class="btn" id="moreBtn" aria-haspopup="true" aria-expanded="false" aria-label="More actions">More ▾</button>
   <div class="menu" id="expMenu">
     <button id="xPdf">Drawing as PDF<small>With title block and legend</small></button>
@@ -331,11 +354,12 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <button id="xCsvCb">Cable list as CSV</button>
     <button id="xCsvCs">Cable summary as CSV<small>Quantity per cable type and length</small></button>
   </div>
-  <div class="menu" id="moreMenu">
-    <button id="mFile" class="narrow-only">Save / Open</button>
+  <div class="menu hasck" id="moreMenu">
+    <button id="mFile" class="narrow-only">Projects</button>
     <button id="mProj">Title block and legend</button>
-    <button id="routeAll">Use curves for all lines</button>
-    <button id="infoBtn" class="wide-only">Hide details panel</button>
+    <button id="routeAll" role="menuitemcheckbox">Curved lines</button>
+    <button id="infoBtn" class="wide-only" role="menuitemcheckbox">Details panel</button>
+    <hr>
     <button id="exBtn">Load example drawing</button>
     <button id="keysBtn">Keyboard shortcuts</button>
     <button id="aboutBtn">About AVLYNX</button>
@@ -346,9 +370,8 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
 <nav class="signals" id="signals" aria-label="Choose signal type"></nav>
 <main>
   <aside id="lib" aria-label="Device library">
-    <div class="libhead"><h2>Devices</h2><button class="btn" id="libClose">Close</button></div>
+    <div class="libhead"><h2>Devices</h2><span class="sp" style="flex:1"></span><button class="btn" id="mgrBtn" title="Groups, categories, import and export of the device library">Manage library</button><button class="btn" id="libClose">Close</button></div>
     <div id="repBar" hidden><span id="repText"></span><button class="btn" id="repCancel">Cancel</button></div>
-    <button class="btn primary" id="mgrBtn">Manage library</button>
     <button class="btn" id="customBtn" title="A device for this drawing only. It is not saved in the library.">+ Custom device</button>
     <input type="search" id="libSearch" placeholder="Search devices" aria-label="Search devices">
     <div id="libList"></div>
@@ -371,7 +394,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       <button data-a="top">Align top</button><button data-a="vmiddle">Align middle</button><button data-a="bottom">Align bottom</button>
       <button data-a="hdist">Distribute horizontally</button><button data-a="vdist">Distribute vertically</button>
     </div>
-    <div id="selbar"><b id="selName"></b><button class="btn" id="editBtn">Edit</button><button class="btn" id="repBtn">Replace</button><button class="btn" id="multiColBtn">Colour</button><button class="btn" id="alignBtn" aria-haspopup="true">Align</button><button class="btn" id="cablesBtn">Edit cables</button><button class="btn" id="sameBtn">Select all</button><button class="btn" id="cornerBtn">Add corner</button><button class="btn" id="resetLineBtn">Reset line</button><button class="btn" id="routeBtn">90°</button><button class="btn" id="refBtn">Arrows</button><button class="btn" id="goSheetBtn">Go to sheet</button><button class="btn" id="dupBtn">Duplicate</button><button class="btn danger" id="delBtn">Delete</button></div>
+    <div id="selbar"><b id="selName"></b><button class="btn" id="editBtn" title="Edit (double-click)">Edit</button><button class="btn" id="repBtn" title="Swap for another device; the cables stay connected">Replace</button><button class="btn" id="multiColBtn">Colour</button><button class="btn" id="alignBtn" aria-haspopup="true">Align</button><button class="btn" id="devsBtn" title="Manufacturer, location, notes and “supplied by others” for all selected devices">Edit devices</button><button class="btn" id="cablesBtn">Edit cables</button><button class="btn" id="lineBtn" aria-haspopup="true" title="Shape of the line, corners, arrows">Line ▾</button><span hidden><button id="sameBtn"></button><button id="cornerBtn"></button><button id="resetLineBtn"></button><button id="routeBtn"></button><button id="refBtn"></button></span><button class="btn" id="goSheetBtn">Go to sheet</button><button class="btn" id="dupBtn" title="Duplicate (Ctrl+D)">Duplicate</button><button class="btn danger" id="delBtn" title="Delete (Del)">Delete</button></div>
     <button class="btn primary" id="fab">Add device</button>
   </div>
 </main>
@@ -391,10 +414,10 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <div>
       <label>Connectors</label>
       <div id="edPorts" class="pcols">
-        <div class="pcol"><h3>Inputs <span>left side</span></h3><div class="plist" data-dir="in" data-empty="No inputs. Add one, or drag a connector here."></div><button class="btn" id="edAdd">Add input</button></div>
-        <div class="pcol"><h3>Outputs <span>right side</span></h3><div class="plist" data-dir="out" data-empty="No outputs. Add one, or drag a connector here."></div><button class="btn" id="edAddOut">Add output</button></div>
+        <div class="pcol"><h3>Inputs <span><b class="pn"></b><button type="button" class="pmenu" data-dir="in" aria-haspopup="true" aria-label="Copy or paste inputs" title="Copy or paste inputs">⋯</button></span></h3><div class="plist" data-dir="in" data-empty="No inputs. Add one, or drag a connector here."></div><button class="btn" id="edAdd">Add input</button></div>
+        <div class="pcol"><h3>Outputs <span><b class="pn"></b><button type="button" class="pmenu" data-dir="out" aria-haspopup="true" aria-label="Copy or paste outputs" title="Copy or paste outputs">⋯</button></span></h3><div class="plist" data-dir="out" data-empty="No outputs. Add one, or drag a connector here."></div><button class="btn" id="edAddOut">Add output</button></div>
       </div>
-      <p class="hint" style="margin-top:6px">Drag a connector by its handle to change the order or to move it to the other side. With the keyboard: focus the handle and use the arrow keys.</p>
+      <p class="hint" style="margin-top:6px">Drag a connector by its handle to change the order or to move it to the other side. ⧉ or Ctrl+D duplicates a connector; ⋯ copies all inputs or outputs to paste them into another device.</p>
     </div>
     <details>
       <summary>Import or export as JSON</summary>
@@ -411,14 +434,12 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
   <div class="dlg">
     <div class="mgrhead"><h2>Device library</h2><span class="sp"></span><button class="btn" id="lockBtn" aria-pressed="true"></button><button class="btn" id="mgrClose">Close</button></div>
     <div class="mgrbar">
-      <button class="btn edit-only" id="mgAddGroup">Add group</button>
-      <button class="btn edit-only" id="mgImport">Import file</button>
       <button class="btn primary" id="mgUpdate" hidden>Apply library update</button>
-      <button class="btn" id="mgUndoUpd" hidden>Undo library update</button>
-      <button class="btn" id="mgCollapse">Collapse or expand categories</button>
-      <button class="btn" id="mgExpJson">Export as JSON</button>
-      <button class="btn" id="mgExpXlsx">Export as Excel</button>
-      <button class="btn danger edit-only" id="mgReset">Reset to defaults</button>
+      <button class="btn edit-only" id="mgAddGroup">+ Group</button>
+      <button class="btn edit-only" id="mgImport" title="JSON, Excel or CSV">Import</button>
+      <button class="btn" id="mgExport" aria-haspopup="true">Export ▾</button>
+      <button class="btn" id="mgMore" aria-haspopup="true" aria-label="More library actions" title="More library actions">⋯</button>
+      <span hidden><button id="mgUndoUpd"></button><button id="mgCollapse"></button><button id="mgExpJson"></button><button id="mgExpXlsx"></button><button id="mgReset"></button></span>
       <input type="file" id="mgrFile" accept=".json,.csv,.xlsx" hidden>
     </div>
     <p class="err" id="mgrMsg"></p>
@@ -426,6 +447,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
   </div>
 </dialog>
 
+<div class="menu ctx" id="ctxMenu" role="menu" aria-label="Edit menu"></div>
 <dialog id="props">
   <div class="dlg">
     <h2 id="prTitle">Edit</h2>
@@ -437,7 +459,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
 
 <dialog id="project">
   <div class="dlg">
-    <h2>Project and legend</h2>
+    <h2>Title block and legend</h2>
     <div class="two">
       <div><label for="pjProject">Project name</label><input type="text" id="pjProject"></div>
       <div><label for="pjTitle">Drawing title</label><input type="text" id="pjTitle" placeholder="e.g. Boardroom signal flow"></div>
@@ -474,7 +496,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       </div>
     </div>
     <p class="err" id="pjErr"></p>
-    <div class="foot"><button class="btn" id="pjCancel">Cancel</button><button class="btn primary" id="pjSave">Save project details</button></div>
+    <div class="foot"><button class="btn" id="pjCancel">Cancel</button><button class="btn primary" id="pjSave">Save changes</button></div>
   </div>
 </dialog>
 
@@ -504,7 +526,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <p style="margin:0">Draw AV system diagrams, connect devices by signal type, and export drawings, equipment lists and cable lists.</p>
     <p style="margin:0; color:var(--muted); font-size:13px" id="wlVersion"></p>
     <div class="libnote" id="wlLib" hidden><span id="wlLibText">A newer device library is available.</span><button class="btn" id="wlLibBtn">Update the device library</button><button class="btn" id="wlUndoBtn" hidden>Undo</button></div>
-    <div class="foot" style="align-self:stretch; justify-content:flex-start"><button class="btn primary" id="wlContinue">Continue last drawing</button><button class="btn" id="wlNew">New drawing</button><button class="btn" id="wlOpen">Open a project</button><button class="btn" id="wlExample">Show the example</button></div>
+    <div class="foot" style="align-self:stretch; justify-content:flex-start"><button class="btn primary" id="wlContinue">Continue last project</button><button class="btn" id="wlNew">New project</button><button class="btn" id="wlOpen">Open project</button><button class="btn" id="wlExample">Show the example</button></div>
   </div>
 </dialog>
 
@@ -515,8 +537,13 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></td><td>Undo / redo</td></tr>
       <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Save the project in this browser</td></tr>
       <tr><td><kbd>Ctrl</kbd> + <kbd>A</kbd></td><td>Select everything on this sheet</td></tr>
-      <tr><td><kbd>Ctrl</kbd> + <kbd>D</kbd></td><td>Duplicate the selected device or text</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></td><td>Copy, cut, paste the selection, also into another sheet or project</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>D</kbd></td><td>Duplicate the selection</td></tr>
       <tr><td><kbd>Shift</kbd> + click</td><td>Add an object to the selection, or remove it</td></tr>
+      <tr><td><kbd>Shift</kbd> + drag</td><td>Select everything inside a frame; a frame across lines only selects those lines. With <kbd>Ctrl</kbd> as well, add to the selection</td></tr>
+      <tr><td>Right-click, long press</td><td>Menu with the actions for the object, or for an empty place</td></tr>
+      <tr><td>Double-click a sheet tab</td><td>Rename the sheet</td></tr>
+      <tr><td>Middle mouse button + drag</td><td>Move the view, also when the pointer is on a device</td></tr>
       <tr><td>Arrow keys</td><td>Move the selection by one grid step; with <kbd>Shift</kbd> by one pixel</td></tr>
       <tr><td><kbd>Delete</kbd></td><td>Delete the selection</td></tr>
       <tr><td>Double-click</td><td>Edit a device or a text</td></tr>
@@ -524,7 +551,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       <tr><td><kbd>Esc</kbd></td><td>Cancel, clear the selection</td></tr>
     </table>
     <p class="hint">On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>. Hold <kbd>Alt</kbd> while moving to switch the alignment guides off for that move.</p>
-    <div class="foot"><button class="btn primary" id="keysClose">Close</button></div>
+    <div class="foot"><button class="btn" id="keysClose">Close</button></div>
   </div>
 </dialog>
 
@@ -544,7 +571,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <p style="margin:0">AV system diagram editor. Draw signal flows, export drawings and equipment lists.</p>
     <p style="margin:0">Created by <b id="abAuthor"></b></p>
     <p style="margin:0; color:var(--muted); font-size:13px" id="abVersion"></p>
-    <div class="foot" style="align-self:stretch"><button class="btn primary" id="abClose">Close</button></div>
+    <div class="foot" style="align-self:stretch"><button class="btn" id="abClose">Close</button></div>
   </div>
 </dialog>
 
@@ -556,7 +583,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
 'use strict';
 if(!window.HTMLDialogElement||!window.PointerEvent){ document.body.style.padding='24px'; document.body.textContent='AVLYNX needs a current browser: Chrome, Edge or Firefox, or Safari 15.4 or newer.'; return; }
 // AVLYNX – created by Timo Schönmeier. Copyright (c) 2026 Timo Schönmeier.
-const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.2',year:2026});
+const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.3',year:2026});
 // Settings an organisation can set when it builds its own edition of this file.
 const EDITION=/*@EDITION@*/'';      // shown next to the version, for example "Example Ltd edition"
 const COMPANY=/*@COMPANY@*/'';      // company name pre-filled in new projects
@@ -847,9 +874,9 @@ function edgeById(id){ return state.edges.find(e=>e.id===id)||(xl().find(x=>x.e.
 function xIncoming(){ const cid=curSid(), out=[]; state.sheets.forEach(sh=>{ if(sh.id!==cid) sh.edges.forEach((e,i)=>{ if(isX(e)&&e.b.s===cid) out.push([sh.id,i,e]); }); }); return out; }
 function xRestore(list){ const cid=curSid(); state.sheets.forEach(sh=>{ if(sh.id!==cid) sh.edges=sh.edges.filter(e=>!(isX(e)&&e.b.s===cid)); });
   list.slice().sort((p,q)=>p[1]-q[1]).forEach(([sid,i,e])=>{ const sh=sheetOf(sid); if(sh&&sid!==cid) sh.edges.splice(Math.min(i,sh.edges.length),0,e); }); }
-// Cables per connector: one, except audio and speaker connectors, which take two
-// (a stereo Phoenix or 3.5 mm output feeding two speakers or two inputs).
-const MAXC={audio:2,spk:2};
+// Cables per connector: one, except analog audio, which takes two (a stereo Phoenix or 3.5 mm output
+// feeding two inputs), and speaker connectors, which take any number (70/100 V lines, speakers in parallel or in a chain).
+const MAXC={audio:2,spk:Infinity};
 const capOf=p=>(p&&MAXC[p.type])||1;
 function cablesAt(r,sid){ sid=sid||curSid(); const sh=sheetOf(sid); if(!sh) return 99; let n=0;
   sheetArr(sh,'edges').forEach(e=>{ if(same(e.a,r)||(!isX(e)&&same(e.b,r))) n++; });
@@ -949,7 +976,8 @@ function check(a,b){
   const pa=xPort(a), pb=xPort(b); if(!pa||!pb) return 'Connector not found.';
   if(a.n===b.n&&!(nodeById(a.n)||{}).loop) return 'Choose a connector on a different device. To connect a device to itself, tick “Allow connections between this device’s own outputs and inputs” under Edit.';
   if(!compat(pa.type,pb.type)) return T[pa.type].label+' does not match '+T[pb.type].label+'.';
-  if(!T[linkType(pa.type,pb.type)].bidi && pa.dir===pb.dir) return pa.dir==='in'?'These are two inputs. Choose an output as the other end.':'These are two outputs. Choose an input as the other end.';
+  const spkChain=pa.type==='spk'&&pb.type==='spk'&&pa.dir==='in'&&pb.dir==='in'; // from one loudspeaker on to the next
+  if(!T[linkType(pa.type,pb.type)].bidi && pa.dir===pb.dir && !spkChain) return pa.dir==='in'?'These are two inputs. Choose an output as the other end.':'These are two outputs. Choose an input as the other end.';
   return null;
 }
 function same(a,b){ return a&&b&&a.n===b.n&&a.p===b.p; }
@@ -989,16 +1017,40 @@ function tidySegs(e){ // drop parts that were dragged flat
     if(Math.abs(s[s.length-2]-B.y)<4){ s.splice(s.length-2,2); changed=true; continue; }
     for(let k=0;k+2<s.length;k++) if(Math.abs(s[k]-s[k+2])<4){ s.splice(k+1,2); changed=true; break; } }
 }
+// A line from an output to an input normally runs across, up or down in the middle, and across again. When a device
+// block stands in the way, the upright part moves into a free gap; if no gap works, the line takes a free channel
+// between the blocks. Lines shaped by hand are never changed.
+function avoidBlocks(e,A,B,a1,b1,pts){
+  const x0=Math.min(A.x,B.x)-60, x1=Math.max(A.x,B.x)+60, y0=Math.min(A.y,B.y)-400, y1=Math.max(A.y,B.y)+400, M=8;
+  const obs=[]; state.nodes.forEach(n=>{ if(n.id===e.a.n||n.id===e.b.n) return; const h=geo(n).h; if(n.x+W<x0||n.x>x1||n.y+h<y0||n.y>y1) return; obs.push({x:n.x-M,y:n.y-M,r:n.x+W+M,b:n.y+h+M}); });
+  if(!obs.length) return null;
+  const hit=(p,q)=>{ const lx=Math.min(p[0],q[0]), hx=Math.max(p[0],q[0]), ly=Math.min(p[1],q[1]), hy=Math.max(p[1],q[1]); let k=0; for(const o of obs) if(hx>o.x&&lx<o.r&&hy>o.y&&ly<o.b) k++; return k; };
+  const cost=ps=>{ let c=0,l=0; for(let i=1;i<ps.length;i++){ c+=hit(ps[i-1],ps[i]); l+=Math.abs(ps[i][0]-ps[i-1][0])+Math.abs(ps[i][1]-ps[i-1][1]); } return c*100000+l+(ps.length-4)*60; };
+  if(!pts.slice(1).some((q,i)=>hit(pts[i],q))) return null; // the usual line is free
+  const mid=(a1+b1)/2, xs=[...new Set([mid].concat(obs.flatMap(o=>[o.x-6,o.r+6])).map(Math.round))].filter(x=>x>=a1&&x<=b1).sort((u,v)=>Math.abs(u-mid)-Math.abs(v-mid)).slice(0,24);
+  let best=null, bc=Infinity; const tryP=ps=>{ const c=cost(ps); if(c<bc){ bc=c; best=ps; } };
+  xs.forEach(x=>tryP([[A.x,A.y],[x,A.y],[x,B.y],[B.x,B.y]]));
+  if(bc>=100000){ const ym=(A.y+B.y)/2, ys=[...new Set(obs.flatMap(o=>[o.y-6,o.b+6]).concat([A.y,B.y]).map(Math.round))].sort((u,v)=>Math.abs(u-ym)-Math.abs(v-ym)).slice(0,14);
+    const xa=xs.slice().sort((u,v)=>u-v).slice(0,6), xb=xs.slice().sort((u,v)=>v-u).slice(0,6);
+    xa.forEach(p1=>xb.forEach(p2=>{ if(p2<p1) return; ys.forEach(yc=>tryP([[A.x,A.y],[p1,A.y],[p1,yc],[p2,yc],[p2,B.y],[B.x,B.y]])); })); }
+  if(!best||bc>=cost(pts)) return null;
+  return best.length===4?{pts:best,i:1,axis:'x'}:{pts:best,i:2,axis:'y'};
+}
 function orthoPts(e,A,B){
   if(segsOk(e)) return {pts:segPts(e.segs,A,B),manual:true};
   if(A.s===-1&&B.s===1){ const t=A; A=B; B=t; }
   const bend=e.bend||0;
   if(A.s===1&&B.s===-1){
     const a1=A.x+STUB, b1=B.x-STUB;
-    if(b1>=a1){ const mx=Math.max(a1,Math.min(b1,(a1+b1)/2+bend)); return {pts:[[A.x,A.y],[mx,A.y],[mx,B.y],[B.x,B.y]],i:1,axis:'x'}; }
+    if(b1>=a1){ const mx=Math.max(a1,Math.min(b1,(a1+b1)/2+bend)), pts=[[A.x,A.y],[mx,A.y],[mx,B.y],[B.x,B.y]];
+      if(!bend&&A.y!==B.y){ const alt=avoidBlocks(e,A,B,a1,b1,pts); if(alt) return alt; }
+      return {pts,i:1,axis:'x'}; }
     const loopN=e.a.n===e.b.n?nodeById(e.a.n):null, my=(loopN?loopN.y+geo(loopN).h+22:(A.y+B.y)/2)+bend; // a line back into the same device runs below it
     return {pts:[[A.x,A.y],[a1,A.y],[a1,my],[b1,my],[b1,B.y],[B.x,B.y]],i:2,axis:'y'};
   }
+  if(Math.abs(A.x-B.x)>40){ // two connectors on the same side of devices next to each other, e.g. loudspeaker to loudspeaker: around below both blocks
+    const na=nodeById(e.a.n), nb=nodeById(e.b.n), yl=Math.max(na?na.y+geo(na).h:A.y,nb?nb.y+geo(nb).h:B.y)+22+bend, xa=A.x+A.s*STUB, xb=B.x+B.s*STUB;
+    return {pts:[[A.x,A.y],[xa,A.y],[xa,yl],[xb,yl],[xb,B.y],[B.x,B.y]],i:2,axis:'y'}; }
   const mx=A.s===1?Math.max(A.x,B.x)+STUB+Math.max(0,bend):Math.min(A.x,B.x)-STUB+Math.min(0,bend);
   return {pts:[[A.x,A.y],[mx,A.y],[mx,B.y],[B.x,B.y]],i:1,axis:'x'};
 }
@@ -1038,6 +1090,11 @@ function routes(){
       if(lx===undefined){ const cc=[.5,.35,.65,.25,.75].map(t=>p[j][0]+(p[j+1][0]-p[j][0])*t); lx=cc.find(x=>free(x,y)); }
       let fx=lx===undefined?cand[0]:lx, fy=y;
       const lblHit=(x,y)=>state.nodes.some(n=>x+17>n.x&&x-17<n.x+W&&y+7>n.y&&y-7<n.y+geo(n).h);
+      if(lx===undefined){ // many cables share their first part (e.g. one speaker output to many loudspeakers): each ID goes where its own line runs
+        let done=false; for(let q=p.length-2;q>=0&&!done;q--){ const hz=p[q][1]===p[q+1][1];
+          for(const t of [.5,.3,.7,.15,.85]){ const x=hz?p[q][0]+(p[q+1][0]-p[q][0])*t:null, yv=hz?p[q][1]:p[q][1]+(p[q+1][1]-p[q][1])*t;
+            for(const c of hz?[[x,yv]]:[[p[q][0]+21,yv],[p[q][0]-21,yv]]) if(free(c[0],c[1])&&!lblHit(c[0],c[1])){ fx=c[0]; fy=c[1]; done=true; break; }
+            if(done) break; } } }
       if(lblHit(fx,fy)){ const vv=[]; for(let q=0;q<p.length-1;q++) if(p[q][0]===p[q+1][0]&&p[q][1]!==p[q+1][1]) vv.push(q);
         vv.sort((u,v)=>Math.abs(p[v+1][1]-p[v][1])-Math.abs(p[u+1][1]-p[u][1]));
         for(const q of vv){ const vx=p[q][0], vy=(p[q][1]+p[q+1][1])/2, c=[vx+21,vx-21].find(x=>!lblHit(x,vy)&&free(x,vy)); if(c!==undefined){ fx=c; fy=vy; break; } } }
@@ -1179,44 +1236,46 @@ function renderNow(){
     tempG.appendChild(el('path',{class:'temp',stroke:t.color,d:wirePath(A,{x:g.w.x,y:g.w.y,s:0})}));
   }
   const many=multi.length>1, selR=!many&&sel&&sel.kind==='edge'?R.get(sel.id):null;
-  if(selR&&selR.handles&&!state.locked) selR.handles.forEach(hd=>{
-    tempG.appendChild(el('circle',{class:'hdl',cx:hd.x,cy:hd.y,r:6.5}));
-    tempG.appendChild(el('circle',{class:'hdlhit',cx:hd.x,cy:hd.y,r:17,'data-handle':sel.id,'data-axis':hd.axis,'data-k':hd.k}));
-  });
+  if(!state.locked){ const hl=many?multi.filter(r=>r.kind==='edge').slice(0,40).map(r=>r.id):selR?[sel.id]:[];
+    hl.forEach(id=>{ const r1=R.get(id); if(r1&&r1.handles) r1.handles.forEach(hd=>{
+      tempG.appendChild(el('circle',{class:'hdl',cx:hd.x,cy:hd.y,r:6.5}));
+      tempG.appendChild(el('circle',{class:'hdlhit',cx:hd.x,cy:hd.y,r:17,'data-handle':id,'data-axis':hd.axis,'data-k':hd.k})); }); }); }
   const selZ=!many&&sel&&sel.kind==='zone'?zoneById(sel.id):null;
   if(selZ&&!state.locked){ tempG.appendChild(el('circle',{class:'hdl',cx:selZ.x+selZ.w,cy:selZ.y+selZ.h,r:6.5})); tempG.appendChild(el('circle',{class:'hdlhit',cx:selZ.x+selZ.w,cy:selZ.y+selZ.h,r:17,'data-zhandle':selZ.id})); }
+  if(g&&g.kind==='marquee'&&g.moved) tempG.appendChild(el('rect',{class:'mrect',x:Math.min(g.w0.x,g.w.x),y:Math.min(g.w0.y,g.w.y),width:Math.abs(g.w.x-g.w0.x),height:Math.abs(g.w.y-g.w0.y)}));
   if(g&&g.kind==='zdraw'&&g.moved) tempG.appendChild(el('rect',{class:'zrect',x:Math.min(g.w0.x,g.w.x),y:Math.min(g.w0.y,g.w.y),width:Math.abs(g.w.x-g.w0.x),height:Math.abs(g.w.y-g.w0.y),rx:10}));
-  $('routeAll').textContent=state.doc.route==='ortho'?'Use curves for all lines':'Use right angles for all lines';
-  $('infoBtn').textContent=state.info===false?'Show details panel':'Hide details panel'; renderInfo();
+  ckItem($('routeAll'),'Curved lines',state.doc.route!=='ortho'); ckItem($('infoBtn'),'Details panel',state.info!==false); renderInfo();
   const bar=$('selbar');
   const nEdges=many?multi.filter(r=>r.kind==='edge').length:0;
   $('multiColBtn').style.display=many&&multi.some(r=>r.kind!=='edge')?'':'none'; $('alignBtn').style.display=many&&multi.filter(r=>r.kind==='node'||r.kind==='text').length>1?'':'none'; $('editBtn').style.display=many?'none':''; $('refBtn').style.display='none'; $('cornerBtn').style.display='none'; $('resetLineBtn').style.display='none'; $('goSheetBtn').style.display='none'; $('repBtn').style.display=!many&&sel&&sel.kind==='node'?'':'none';
-  $('cablesBtn').style.display=nEdges?'':'none'; $('cablesBtn').textContent=nEdges>1?'Edit '+nEdges+' cables':'Edit cable'; $('sameBtn').style.display='none';
-  if(many){ bar.classList.add('on'); $('selName').textContent=multi.length+' selected'; $('dupBtn').style.display='none'; $('routeBtn').style.display='none'; }
+  $('lineBtn').style.display='none'; $('devsBtn').style.display='none'; $('cablesBtn').style.display=nEdges?'':'none'; $('cablesBtn').textContent=nEdges>1?'Edit '+nEdges+' cables':'Edit cable'; $('sameBtn').style.display='none';
+  if(many){ bar.classList.add('on'); $('selName').textContent=multi.length+' selected'; $('lineBtn').style.display=nEdges?'':'none'; $('devsBtn').style.display=multi.filter(r=>r.kind==='node').length>1?'':'none'; $('dupBtn').style.display=multi.some(r=>r.kind!=='edge')?'':'none'; $('routeBtn').style.display='none'; }
   else if(sel){
     bar.classList.add('on');
     if(sel.kind==='node'){ const n=nodeById(sel.id); $('selName').textContent=n?n.name:''; $('dupBtn').style.display=''; $('routeBtn').style.display='none'; }
     else if(sel.kind==='text'){ const t=textById(sel.id); $('selName').textContent=t?cut(tLines(t)[0]||'Text',24):''; $('dupBtn').style.display=''; $('routeBtn').style.display='none'; }
-    else if(sel.kind==='zone'){ $('selName').textContent=selZ?selZ.name:''; $('dupBtn').style.display='none'; $('routeBtn').style.display='none'; }
-    else { const e=edgeById(sel.id), xs=isX(e), xr=xs?xl().find(x=>x.e===e):null; $('selName').textContent=e?cableId(e):''; $('dupBtn').style.display='none'; $('routeBtn').style.display=e&&(e.ref||xs)?'none':''; if(xr){ $('goSheetBtn').style.display=''; $('goSheetBtn').textContent='Go to “'+cut(sheetOf(xr.rem.s).name,18)+'”'; } $('routeBtn').textContent=e&&routeOf(e)==='ortho'?'Curve':'90°'; $('refBtn').style.display=xs?'none':''; $('refBtn').textContent=e&&e.ref?'Line':'Arrows';
+    else if(sel.kind==='zone'){ $('selName').textContent=selZ?selZ.name:''; $('dupBtn').style.display=''; $('routeBtn').style.display='none'; }
+    else { const e=edgeById(sel.id), xs=isX(e), xr=xs?xl().find(x=>x.e===e):null; $('selName').textContent=e?cableId(e):''; $('dupBtn').style.display='none'; $('routeBtn').style.display=e&&(e.ref||xs)?'none':''; if(xr){ $('goSheetBtn').style.display=''; $('goSheetBtn').textContent='Go to “'+cut(sheetOf(xr.rem.s).name,18)+'”'; } $('routeBtn').textContent=e&&routeOf(e)==='ortho'?'Curve':'90°'; $('lineBtn').style.display=e?'':'none';
       const orth=e&&!xs&&!e.ref&&routeOf(e)==='ortho'&&!state.locked; $('cornerBtn').style.display=orth?'':'none'; $('resetLineBtn').style.display=orth&&(segsOk(e)||e.bend)?'':'none'; if(e&&T[e.type]){ $('sameBtn').style.display=''; $('sameBtn').textContent='All '+T[e.type].label; $('sameBtn').title='Select all '+T[e.type].label+' cables on this sheet'; } }
   } else bar.classList.remove('on');
   let st='';
   if(drawZone) st='Drag across the drawing to frame a room';
-  else if(many&&nEdges>1&&nEdges===multi.length) st='Tap “Edit '+nEdges+' cables” to set the cable type, length or notes for all of them';
-  else if(many) st='Shift-click adds or removes objects. Drag one of them to move them all';
+  else if(many&&nEdges>1&&nEdges===multi.length) st='“Edit '+nEdges+' cables” sets type, length and notes; Line ▾ shapes all of them; a round handle moves the same part of every line';
+  else if(many) st='Drag one of them to move them all. '+MOD+'C copies, '+MOD+'V pastes, right-click for more';
   else if(sel&&sel.kind==='text'&&!state.locked) st='Drag to move the text. Double-click or tap “Edit” to change it';
   else if(state.locked&&sel) st='The drawing is locked. Unlock it to move objects';
   else if(selZ) st='Drag the frame to move the room with its devices. Drag the round handle to resize';
   else if(pending&&xPort(pending)){ const pp=xPort(pending), far=pending.s&&pending.s!==curSid(); st=far?T[pp.type].label+' from “'+sheetOf(pending.s).name+'” / '+xNode(pending.s,pending.n).name+': tap the destination connector on this sheet':T[pp.type].label+': now tap the destination connector'+(state.sheets.length>1?', on this sheet or on another one':''); }
   else if(!state.nodes.length&&!state.zones.length&&!state.texts.length) st='';
   else if(!many&&sel&&sel.kind==='edge'&&isX(edgeById(sel.id))) st='This cable continues on another sheet. Double-click its tag or tap “Go to” to follow it';
-  else if(!many&&sel&&sel.kind==='edge'&&(state.edges.find(x=>x.id===sel.id)||{}).ref) st='This connection is shown as arrows. Tap “Line” to draw it as a line again';
-  else if(selR&&selR.handle) st='Drag a round handle to move that part of the line. “Add corner” adds two right-angle corners';
+  else if(!many&&sel&&sel.kind==='edge'&&(state.edges.find(x=>x.id===sel.id)||{}).ref) st='This connection is shown as arrows. Use Line ▾ to draw it as a line again';
+  else if(selR&&selR.handle) st='Drag a round handle to move that part of the line. Line ▾ adds corners';
   else if(lod&&!sel) st='Overview: zoom in to see details and to connect devices';
   else if(!sel) st='Tap a connector, then tap its destination';
-  $('statusText').textContent=st;
-  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.type===activeType)));
+  $('statusText').textContent=st.replace(/\bTap\b/g,TAP).replace(/\btap\b/g,TAP.toLowerCase());
+  { const used=new Set(); state.nodes.forEach(n=>(n.ports||[]).forEach(p=>used.add(p.type))); if(activeType) used.add(activeType);
+    document.querySelectorAll('#signals .chip').forEach(c=>{ c.hidden=!used.has(c.dataset.type); c.setAttribute('aria-pressed',String(c.dataset.type===activeType)); });
+    $('signals').querySelector('.none').hidden=used.size>0; const sig=$('signals'); sig.classList.toggle('more',sig.scrollWidth-sig.scrollLeft-sig.clientWidth>4); }
   const lg=$('legend'), dc=state.doc; lg.replaceChildren();
   if(dc.legend){
     lg.classList.add('on');
@@ -1261,6 +1320,7 @@ function removeSel(){
   state.nodes=state.nodes.filter(n=>!nd.has(n.id)); state.edges=state.edges.filter(e=>!ed.has(e.id)&&!nd.has(e.a.n)&&!nd.has(e.b.n));
   { const cid=curSid(); state.sheets.forEach(sh=>{ if(sh.id!==cid) sh.edges=sh.edges.filter(e=>!(isX(e)&&e.b.s===cid&&(ed.has(e.id)||nd.has(e.b.n)))); }); } state.zones=state.zones.filter(z=>!zn.has(z.id));
   multi=[]; sel=null; pending=null; save(); render();
+  if(zn.size&&!nd.size&&refs.every(r=>r.kind==='zone')) toast(zn.size>1?'Rooms removed. Their devices stay; right-click a room to delete it with its contents.':'Room removed. Its devices stay; right-click a room to delete it with its contents.');
 }
 let EXAMPLE_TPL=null;
 function example(){
@@ -1285,7 +1345,11 @@ function startPinch(){
   g={kind:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y)||1,k0:view.k,wx:(mx-view.x)/view.k,wy:(my-view.y)/view.k};
 }
 function refOf(pe){ const i=pe.dataset.port.lastIndexOf(':'); return {n:pe.dataset.port.slice(0,i),p:+pe.dataset.port.slice(i+1)}; }
+svg.addEventListener('mousedown',e=>{ if(e.button===1) e.preventDefault(); }); // no auto-scroll of the browser
 svg.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button===1){ // middle mouse button: move the view, wherever it is pressed
+    e.preventDefault(); pointers.clear(); try{ svg.setPointerCapture(e.pointerId); }catch(_){} pointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); closeMenus(); closeCtx();
+    g={sx:e.clientX,sy:e.clientY,moved:false,kind:'pan',vx:view.x,vy:view.y,mid:true}; svg.classList.add('grabbing'); return; }
   if(e.pointerType==='mouse'&&e.button!==0) return;
   if(e.isPrimary) pointers.clear(); // a first finger or the mouse: forget any contact whose release was never reported
   try{ svg.setPointerCapture(e.pointerId); }catch(_){}
@@ -1298,7 +1362,8 @@ svg.addEventListener('pointerdown',e=>{
   const he=t.closest('[data-handle]'), zh=t.closest('[data-zhandle]'), ze=t.closest('[data-zone]');
   if(drawZone) g=Object.assign(base,{kind:'zdraw',w0:toWorld(e),w:toWorld(e)});
   else if(zh){ const z=zoneById(zh.dataset.zhandle); g=Object.assign(base,{kind:'zresize',id:z.id,ow:z.w,oh:z.h,w0:toWorld(e)}); }
-  else if(he){ const ed2=state.edges.find(x=>x.id===he.dataset.handle); g=Object.assign(base,{kind:'bend',id:ed2.id,axis:he.dataset.axis,k:+he.dataset.k,s0:curSegs(ed2),w0:toWorld(e)}); }
+  else if(he){ const ed2=state.edges.find(x=>x.id===he.dataset.handle), k=+he.dataset.k; const others=multi.length>1?selEdges().filter(x=>x!==ed2&&shapeable(x)).map(x=>({e:x,s0:curSegs(x)})).filter(o=>o.s0.length>k):[];
+    g=Object.assign(base,{kind:'bend',id:ed2.id,axis:he.dataset.axis,k,s0:curSegs(ed2),w0:toWorld(e),others}); }
   else if(pe) g=Object.assign(base,{kind:'wire',from:refOf(pe),w:toWorld(e)});
   else if(te){
     const tx=textById(te.dataset.text), ref={kind:'text',id:tx.id}; pending=null; activeType=null;
@@ -1317,17 +1382,23 @@ svg.addEventListener('pointerdown',e=>{
   else if(ee){ const ref={kind:'edge',id:ee.dataset.edge}; lastEdgePt=toWorld(e); { const e1=edgeById(ref.id); if(e1&&T[e1.type]) activeType=e1.type; } if(e.shiftKey) toggleMulti(ref); else { multi=[]; sel=ref; } pending=null; g=Object.assign(base,{kind:ee.dataset.x&&!e.shiftKey?'xtag':'none',id:ref.id}); render(); }
   else if(ze){
     const z=zoneById(ze.dataset.zone), ref={kind:'zone',id:z.id}; pending=null; activeType=null;
-    if(e.shiftKey){ toggleMulti(ref); g=Object.assign(base,{kind:'none'}); render(); return; }
+    if(e.shiftKey){ g=Object.assign(base,{kind:'marquee',w0:toWorld(e),w:toWorld(e),add:true,ref}); return; } // a click toggles the room, a drag frames objects
     if(multi.length>1&&isSelected('zone',z.id)){ g=groupDrag(base,e); render(); return; }
     multi=[]; sel=ref;
     const inside=state.nodes.filter(n=>inZone(z,rectOf('node',n))).concat(state.texts.filter(t=>inZone(z,tbox(t)))).map(n=>({n,ox:n.x,oy:n.y}));
     g=Object.assign(base,{kind:'zone',id:z.id,ox:z.x,oy:z.y,w0:toWorld(e),inside,r0:rectOf('zone',z),tg:guideTargets(new Set([z,...inside.map(it=>it.n)])),segs:segEdges(inside.map(it=>it.n))}); render();
   }
+  else if(e.shiftKey&&e.pointerType!=='touch') g=Object.assign(base,{kind:'marquee',w0:toWorld(e),w:toWorld(e),add:e.ctrlKey||e.metaKey});
   else g=Object.assign(base,{kind:'pan',vx:view.x,vy:view.y});
+  if(e.pointerType==='touch'&&e.isPrimary&&g.kind!=='wire'&&g.kind!=='bend'){ const x0=e.clientX, y0=e.clientY, me=g; clearTimeout(lpTimer); lpTimer=setTimeout(()=>{ if(g===me&&!me.moved&&pointers.size===1){ g={kind:'none'}; openCtx(x0,y0,ne||ee||te||ze); } },550); }
   if(state.locked&&['node','text','zone','zresize','bend','group'].includes(g.kind)) g.kind='none'; // locked: select, but do not move
 });
-let altHeld=false;
-svg.addEventListener('pointermove',e=>{
+const TAP=matchMedia('(pointer:coarse)').matches?'Tap':'Click';
+let altHeld=false, lpTimer=0, mouseW=null;
+svg.addEventListener('pointerleave',()=>{ mouseW=null; });
+svg.addEventListener('pointermove',e=>{ canvasMove(e); edgeScroll(e); });
+function canvasMove(e){
+  if(e.pointerType!=='touch') mouseW=toWorld(e);
   if(!pointers.has(e.pointerId)||!g) return; altHeld=e.altKey;
   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(g.kind==='pinch'){
@@ -1337,6 +1408,7 @@ svg.addEventListener('pointermove',e=>{
     view={k,x:(a.x+b.x)/2-r.left-g.wx*k,y:(a.y+b.y)/2-r.top-g.wy*k}; rq(); return;
   }
   if(!g.moved&&Math.hypot(e.clientX-g.sx,e.clientY-g.sy)<6) return;
+  clearTimeout(lpTimer);
   if(g.kind==='wire'){
     if(!g.moved){ pending=g.from; sel=null; const p=portOf(g.from); if(p) activeType=p.type; }
     g.moved=true; g.w=toWorld(e); rq();
@@ -1350,10 +1422,11 @@ svg.addEventListener('pointermove',e=>{
     g.moved=true; const ed2=state.edges.find(x=>x.id===g.id), w=toWorld(e); if(!ed2) return;
     let v=Math.round(g.s0[g.k]+(g.axis==='x'?w.x-g.w0.x:w.y-g.w0.y));
     if(g.axis==='y'){ const ys=[absPort(ed2.a).y,absPort(ed2.b).y]; ys.forEach(y=>{ if(Math.abs(v-y)<6) v=y; }); } // level with a connector: the line runs straight
-    const sg=g.s0.slice(); sg[g.k]=v; ed2.segs=sg; delete ed2.bend; rq();
+    const sg=g.s0.slice(); sg[g.k]=v; ed2.segs=sg; delete ed2.bend;
+    const dv=v-g.s0[g.k]; g.others.forEach(o=>{ const s2=o.s0.slice(); s2[g.k]=o.s0[g.k]+dv; o.e.segs=s2; delete o.e.bend; }); rq();
   } else if(g.kind==='group'){
     g.moved=true; const w=toWorld(e), p=placeBy(g.frame,w.x-g.w0.x,w.y-g.w0.y,g.tg,true); g.items.forEach(it=>{ it.o.x=it.ox+p.dx; it.o.y=it.oy+p.dy; }); moveSegs(g.segs,p.dx,p.dy); g.lines=p.lines; rq();
-  } else if(g.kind==='zdraw'){
+  } else if(g.kind==='zdraw'||g.kind==='marquee'){
     g.moved=true; g.w=toWorld(e); rq();
   } else if(g.kind==='zone'){
     g.moved=true; const z=zoneById(g.id), w=toWorld(e); if(!z) return; const p=placeBy(g.r0,w.x-g.w0.x,w.y-g.w0.y,g.tg,true), dx=p.dx, dy=p.dy; g.lines=p.lines;
@@ -1363,14 +1436,29 @@ svg.addEventListener('pointermove',e=>{
   } else if(g.kind==='pan'){
     g.moved=true; view.x=g.vx+e.clientX-g.sx; view.y=g.vy+e.clientY-g.sy; rq();
   }
-});
+}
+// While something is dragged near the edge of the drawing, the view moves along, so the object can be put down
+// in a part that was not visible. The further into the edge zone, the faster.
+const AUTO_KINDS=new Set(['node','text','group','zone','zresize','wire','marquee','bend','zdraw']);
+let edgeVel=null, edgeEvt=null, edgeRaf=0;
+function edgeScroll(e){
+  if(!g||!g.moved||!AUTO_KINDS.has(g.kind)||pointers.size!==1){ edgeVel=null; return; }
+  const r=svg.getBoundingClientRect(), M=Math.min(48,r.width/6,r.height/6), sp=d=>{ d=Math.max(0,d); return d<M?Math.round(2+16*(M-d)/M):0; };
+  const vx=sp(e.clientX-r.left)-sp(r.right-e.clientX), vy=sp(e.clientY-r.top)-sp(r.bottom-e.clientY);
+  edgeEvt={clientX:e.clientX,clientY:e.clientY,pointerId:e.pointerId,pointerType:e.pointerType,altKey:e.altKey,shiftKey:e.shiftKey,ctrlKey:e.ctrlKey,metaKey:e.metaKey};
+  edgeVel=vx||vy?{x:vx,y:vy}:null;
+  if(edgeVel&&!edgeRaf) edgeRaf=requestAnimationFrame(edgeStep);
+}
+function edgeStep(){ edgeRaf=0; if(!edgeVel||!g||!edgeEvt){ edgeVel=null; return; }
+  view.x+=edgeVel.x; view.y+=edgeVel.y; canvasMove(edgeEvt); rq(); edgeRaf=requestAnimationFrame(edgeStep); }
+
 function pointerEnd(e){
   if(!pointers.has(e.pointerId)) return;
   pointers.delete(e.pointerId);
   if(!g) return;
   if(g.kind==='pinch'){ g=pointers.size?{kind:'none'}:null; return; }
   if(pointers.size) return;
-  const cur=g; g=null;
+  clearTimeout(lpTimer); svg.classList.remove('grabbing'); edgeVel=null; const cur=g; g=null;
   if(cur.kind==='wire'){
     if(cur.moved){
       const hitEl=document.elementFromPoint(e.clientX,e.clientY), pe=hitEl&&hitEl.closest?hitEl.closest('[data-port]'):null;
@@ -1383,7 +1471,7 @@ function pointerEnd(e){
       else if(connect(pending,ref)) pending=null;
     }
   } else if(cur.kind==='node'||cur.kind==='text'){ if(cur.moved){ save(); lastTap=null; } else if(e.type==='pointerup') tapped(cur.kind,cur.id); pending=null; }
-  else if(cur.kind==='bend'){ if(cur.moved){ const ed2=state.edges.find(x=>x.id===cur.id); tidySegs(ed2); save(); } }
+  else if(cur.kind==='bend'){ if(cur.moved){ const ed2=state.edges.find(x=>x.id===cur.id); tidySegs(ed2); (cur.others||[]).forEach(o=>tidySegs(o.e)); save(); } }
   else if(cur.kind==='xtag'){ if(!cur.moved&&e.type==='pointerup'&&tapped('edge',cur.id)) return; }
   else if(cur.kind==='zone'||cur.kind==='zresize'||cur.kind==='group'){ if(cur.moved) save(); }
   else if(cur.kind==='zdraw'){
@@ -1397,7 +1485,8 @@ function pointerEnd(e){
       toast('That frame is too small. Drag across a larger area.');
     }
   }
-  else if(cur.kind==='pan'&&!cur.moved){ sel=null; multi=[]; pending=null; activeType=null; }
+  else if(cur.kind==='pan'&&!cur.moved&&!cur.mid){ sel=null; multi=[]; pending=null; activeType=null; }
+  else if(cur.kind==='marquee'){ if(cur.moved) frameSelect(cur.w0,cur.w,cur.add); else if(cur.ref){ toggleMulti(cur.ref); } }
   render();
 }
 svg.addEventListener('pointerup',pointerEnd);
@@ -1414,10 +1503,13 @@ document.addEventListener('keydown',e=>{
   const zk=(e.ctrlKey||e.metaKey)&&e.key.toLowerCase();
   if(zk==='z'){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); }
   if(zk==='y'){ e.preventDefault(); redo(); }
-  if(zk==='a'){ e.preventDefault(); multi=[...state.nodes.map(n=>({kind:'node',id:n.id})),...state.zones.map(z=>({kind:'zone',id:z.id})),...state.texts.map(t=>({kind:'text',id:t.id})),...liveEdges().map(x=>({kind:'edge',id:x.id}))]; sel=multi.length?multi[multi.length-1]:null; pending=null; render(); }
-  if(e.key==='Escape'){ drawZone=false; pending=null; sel=null; multi=[]; endReplace(); closeMenus(); render(); }
+  if(zk==='a'){ e.preventDefault(); selectAll(); }
+  if(zk==='c'&&!String(getSelection&&getSelection())){ if(selRefs().length){ e.preventDefault(); const d=copySel(); if(d) toast('Copied '+clipText(d)); } }
+  if(zk==='x'){ if(selRefs().length){ e.preventDefault(); cutSel(); } }
+  if(zk==='v'){ e.preventDefault(); pasteClip(mouseW); }
+  if(e.key==='Escape'){ drawZone=false; pending=null; sel=null; multi=[]; endReplace(); closeMenus(); closeCtx(); render(); }
   if(zk==='s'){ e.preventDefault(); const en=saveInBrowser(); if(en) toast('Saved “'+en.name+'” in this browser'); }
-  if(zk==='d'){ e.preventDefault(); if(sel&&multi.length<2) $('dupBtn').click(); }
+  if(zk==='d'){ e.preventDefault(); if(sel) dupSel(); }
   if(!e.ctrlKey&&!e.metaKey&&!e.altKey){
     if(e.key==='+'||e.key==='=') zoomStep(1); else if(e.key==='-'||e.key==='_') zoomStep(-1); else if(e.key==='f'||e.key==='F') fit();
   }
@@ -1434,10 +1526,11 @@ function nudge(dx,dy){
 }
 
 // toolbars, menus, library
+$('signals').append(h('span',{className:'lbl',textContent:'Highlight'}),h('span',{className:'none',textContent:'Signal types appear here when devices are on the drawing'}));
 TYPES.forEach(t=>{
   const b=h('button',{className:'chip',type:'button'}); b.dataset.type=t.id; b.style.setProperty('--c',t.color);
   const sw=h('i'); if(t.dash) sw.className=t.dash[0]==='2'?'dot':'dash'; b.append(sw,t.label);
-  b.title='Highlight all '+t.label+' connectors. Click again, or click anywhere else on the drawing, to clear';
+  b.title='Highlight all '+t.label+' connectors. Click again to clear';
   b.addEventListener('click',()=>{ activeType=activeType===t.id?null:t.id; pending=null; render(); });
   $('signals').appendChild(b);
 });
@@ -1507,7 +1600,7 @@ function startReplace(){
   $('repBar').hidden=false; $('lib').classList.add('open'); $('libSearch').focus(); render();
 }
 function endReplace(){ replacing=null; const b=$('repBar'); if(b) b.hidden=true; }
-function replaceDevice(def){
+function replaceDevice(def,msg){
   const n=nodeById(replacing); endReplace(); $('lib').classList.remove('open'); if(!n) return;
   const cid=curSid(), np=clone(def.ports), ends=[];
   state.edges.forEach(e=>{ if(e.a.n===n.id) ends.push({e,k:'a'}); if(!isX(e)&&e.b.n===n.id) ends.push({e,k:'b'}); });
@@ -1527,7 +1620,7 @@ function replaceDevice(def){
   ends.forEach(x=>{ if(kill.has(x.e)) return; const e=x.e, pa=x.home?xPort({n:e.a.n,p:e.a.p,s:x.home.id}):portOf(e.a), pb=x.home?portOf(e.b):xPort(e.b); if(pa&&pb) e.type=linkType(pa.type,pb.type); });
   sel={kind:'node',id:n.id}; pending=null; save(); render();
   const kept=ends.length-kill.size;
-  toast('Replaced by “'+def.name+'”.'+(ends.length?' '+kept+' of '+ends.length+' cables kept.':'')+(lost.length?' Removed, no matching connector: '+cut(lost.join(', '),80)+(lost.length>1?'. Undo brings them back.':'. Undo brings it back.'):''));
+  toast((msg||'Replaced by “'+def.name+'”.')+(ends.length?' '+kept+' of '+ends.length+' cables kept.':'')+(lost.length?' Removed, no matching connector: '+cut(lost.join(', '),80)+(lost.length>1?'. Undo brings them back.':'. Undo brings it back.'):''));
 }
 // drag a device from the library onto the drawing (mouse and pen; on touch screens a tap adds it)
 let libDrag=null, libDragDone=false;
@@ -1560,7 +1653,7 @@ let clearArmed=0;
 $('clearBtn').addEventListener('click',()=>{
   const b=$('clearBtn');
   if(Date.now()-clearArmed<3000){ state.nodes=[]; state.edges=[]; state.zones=[]; state.texts=[]; sel=null; multi=[]; pending=null; clearArmed=0; b.textContent='Clear drawing'; closeMenus(); save(); fit(); return; }
-  clearArmed=Date.now(); b.textContent='Tap again to clear the drawing'; setTimeout(()=>{ b.textContent='Clear drawing'; },3000);
+  clearArmed=Date.now(); b.textContent=TAP+' again to clear the drawing'; setTimeout(()=>{ b.textContent='Clear drawing'; },3000);
 });
 $('delBtn').addEventListener('click',removeSel);
 $('lockDraw').addEventListener('click',()=>{ state.locked=!state.locked; persist(); render(); toast(state.locked?'Drawing locked: objects cannot be moved':'Drawing unlocked'); });
@@ -1634,17 +1727,32 @@ $('routeBtn').addEventListener('click',()=>{
 });
 let lastEdgePt=null;
 // two right-angle corners in the level part of the line nearest to where it was clicked
-$('cornerBtn').addEventListener('click',()=>{
-  const e=sel&&sel.kind==='edge'&&state.edges.find(x=>x.id===sel.id); if(!e||isX(e)||e.ref||routeOf(e)!=='ortho') return;
-  if(state.locked){ toast('The drawing is locked. Unlock it to change lines.'); return; }
-  const A=absPort(e.a), B=absPort(e.b), sg=curSegs(e), pts=segPts(sg,A,B), P0=lastEdgePt||{x:(A.x+B.x)/2,y:(A.y+B.y)/2};
+const shapeable=e=>!!e&&!isX(e)&&!e.ref&&routeOf(e)==='ortho';
+function addCorner(e,P1){ // false when the line has no level part long enough
+  const A=absPort(e.a), B=absPort(e.b), sg=curSegs(e), pts=segPts(sg,A,B), P0=P1||{x:(A.x+B.x)/2,y:(A.y+B.y)/2};
   const lv=[]; for(let i=0;i<pts.length-1;i++) if(pts[i][1]===pts[i+1][1]) lv.push({i,x0:pts[i][0],x1:pts[i+1][0],y:pts[i][1]});
   const dist=l=>{ const x=Math.max(Math.min(l.x0,l.x1),Math.min(Math.max(l.x0,l.x1),P0.x)); return Math.hypot(x-P0.x,l.y-P0.y); };
-  const long=lv.filter(l=>Math.abs(l.x1-l.x0)>=40); if(!long.length){ toast('The line is too short for another corner. Move the devices further apart.'); return; }
+  const long=lv.filter(l=>Math.abs(l.x1-l.x0)>=40); if(!long.length) return false;
   const l=long.sort((p,q)=>dist(p)-dist(q))[0], m=Math.round((l.x0+l.x1)/2), d=P0.y>l.y?40:-40;
   let ns; if(l.i===0) ns=[m,A.y+d].concat(sg); else if(l.i===pts.length-2) ns=sg.concat([B.y+d,m]); else { const k=l.i-1; ns=sg.slice(0,k+1).concat([m,l.y+d]).concat(sg.slice(k+1)); }
-  e.segs=ns; delete e.bend; save(); render(); toast('Corner added. Drag the round handles to move each part of the line.');
+  e.segs=ns; delete e.bend; return true;
+}
+$('cornerBtn').addEventListener('click',()=>{
+  const e=sel&&sel.kind==='edge'&&state.edges.find(x=>x.id===sel.id); if(!shapeable(e)) return;
+  if(state.locked){ toast('The drawing is locked. Unlock it to change lines.'); return; }
+  if(!addCorner(e,lastEdgePt)){ toast('The line is too short for another corner. Move the devices further apart.'); return; }
+  save(); render(); toast('Corner added. Drag the round handles to move each part of the line.');
 });
+// line actions for several selected lines at once
+const selEdges=()=>selRefs().filter(r=>r.kind==='edge').map(r=>state.edges.find(x=>x.id===r.id)).filter(Boolean);
+function lineItemsMulti(list){ const live=list.filter(e=>!isX(e)), sh=live.filter(e=>!e.ref), allCurved=sh.length&&sh.every(e=>routeOf(e)!=='ortho'), allRef=live.length&&live.every(e=>e.ref), n=live.length, it=[];
+  const done=(msg)=>{ save(); render(); toast(msg); };
+  if(sh.length) it.push({label:'Curved',check:!!allCurved,fn:()=>{ sh.forEach(e=>{ e.route=allCurved?'ortho':'curve'; delete e.bend; delete e.segs; }); done((allCurved?'Right-angled':'Curved')+': '+sh.length+' lines'); }});
+  const orth=sh.filter(e=>routeOf(e)==='ortho');
+  if(orth.length&&!state.locked){ it.push({label:'Add corner to '+orth.length+' lines',fn:()=>{ const k=orth.filter(e=>addCorner(e,null)).length; done(k?'Corner added to '+k+' of '+orth.length+' lines. Drag a round handle to move the same part of all selected lines.':'The lines are too short for another corner.'); }});
+    if(orth.some(e=>segsOk(e)||e.bend)) it.push({label:'Reset '+orth.length+' lines',fn:()=>{ orth.forEach(e=>{ delete e.segs; delete e.bend; }); done('Lines reset to their automatic route'); }}); }
+  if(n) it.push({label:'Show as arrows',check:!!allRef,fn:()=>{ live.forEach(e=>{ if(allRef) delete e.ref; else e.ref=true; }); done(allRef?'Shown as lines':'Shown as arrows: '+n+' connections'); }});
+  return it; }
 $('resetLineBtn').addEventListener('click',()=>{ const e=sel&&sel.kind==='edge'&&state.edges.find(x=>x.id===sel.id); if(!e) return; delete e.segs; delete e.bend; save(); render(); });
 $('infoBtn').addEventListener('click',()=>{ state.info=state.info===false; persist(); closeMenus(); render(); toast(state.info?'Details panel on: select a device, cable or room':'Details panel off'); });
 // details of the selected device, cable or room, shown bottom right; read-only
@@ -1676,13 +1784,132 @@ $('routeAll').addEventListener('click',()=>{
   state.edges.forEach(e=>{ delete e.route; delete e.bend; delete e.segs; });
   closeMenus(); save(); render();
 });
-$('dupBtn').addEventListener('click',()=>{
-  const t=sel&&sel.kind==='text'&&textById(sel.id);
-  if(t){ const c=Object.assign(clone(t),{id:uid('t'),x:t.x+24,y:t.y+24}); state.texts.push(c); sel={kind:'text',id:c.id}; save(); render(); return; }
-  const n=sel&&sel.kind==='node'&&nodeById(sel.id); if(!n) return;
-  const c=Object.assign(clone(n),{id:uid('n'),x:n.x+24,y:n.y+24});
-  state.nodes.push(c); sel={kind:'node',id:c.id}; save(); render();
-});
+$('dupBtn').addEventListener('click',()=>dupSel());
+
+// Copy, cut, paste and duplicate. A room brings its devices and texts; cables come along when both of their
+// devices do. The clipboard is kept in the browser, so it also pastes into another sheet or project.
+const CLIP_KEY='avlynx.clip.v1'; let clipMem=null, pasteN=0;
+const MAC=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent||''), MOD=MAC?'\u2318':'Ctrl+';
+const selRefs=()=>multi.length>1?multi.slice():sel?[sel]:[];
+function gatherSel(){
+  const nodes=new Set(), texts=new Set(), zones=new Set();
+  selRefs().forEach(r=>{
+    if(r.kind==='node'){ const n=nodeById(r.id); if(n) nodes.add(n); }
+    else if(r.kind==='text'){ const t=textById(r.id); if(t) texts.add(t); }
+    else if(r.kind==='zone'){ const z=zoneById(r.id); if(z){ zones.add(z); state.nodes.forEach(n=>{ if(inZone(z,rectOf('node',n))) nodes.add(n); }); state.texts.forEach(t=>{ if(inZone(z,tbox(t))) texts.add(t); }); } }
+  });
+  const ids=new Set([...nodes].map(n=>n.id));
+  return {nodes:[...nodes],edges:state.edges.filter(e=>!isX(e)&&ids.has(e.a.n)&&ids.has(e.b.n)),zones:[...zones],texts:[...texts]};
+}
+const emptyClip=d=>!d||!(d.nodes.length||d.texts.length||d.zones.length);
+function clipText(d){ const p=[], add=(n,one,more)=>{ if(n) p.push(n+' '+(n>1?more:one)); };
+  add(d.nodes.length,'device','devices'); add(d.edges.length,'cable','cables'); add(d.zones.length,'room','rooms'); add(d.texts.length,'text','texts'); return p.join(', '); }
+function copySel(){
+  const d=clone(gatherSel()); if(emptyClip(d)){ toast('Select devices, texts or rooms to copy.'); return null; }
+  clipMem=d; pasteN=0; try{ localStorage.setItem(CLIP_KEY,JSON.stringify({app:'AVLYNX',type:'clip',version:1,data:d})); }catch(_){}
+  return d;
+}
+function readClip(){ try{ const o=JSON.parse(localStorage.getItem(CLIP_KEY)||'null'); if(o&&o.app==='AVLYNX'&&o.type==='clip'&&o.data) return o.data; }catch(_){} return clipMem; }
+function pasteData(raw,at,off){ // at: world point for the top left corner; otherwise the copy is placed off the original
+  let d; try{ d=checkProject({app:'AVLYNX',type:'project',version:2,cur:0,doc:{},sheets:[{id:'clip',name:'Clip',nodes:raw.nodes||[],edges:raw.edges||[],zones:raw.zones||[],texts:raw.texts||[]}]}).sheets[0]; }
+  catch(_){ toast('The copied objects cannot be pasted.'); return false; }
+  const boxes=[...d.nodes.map(n=>rectOf('node',n)),...d.texts.map(t=>tbox(t)),...d.zones.map(z=>rectOf('zone',z))]; if(!boxes.length) return false;
+  const x0=Math.min(...boxes.map(b=>b.x)), y0=Math.min(...boxes.map(b=>b.y)), dx=at?snap(at.x-x0):off, dy=at?snap(at.y-y0):off, map={}, refs=[];
+  d.zones.forEach(z=>{ z.id=uid('z'); z.x+=dx; z.y+=dy; state.zones.push(z); refs.push({kind:'zone',id:z.id}); });
+  d.nodes.forEach(n=>{ map[n.id]=uid('n'); n.id=map[n.id]; n.x+=dx; n.y+=dy; state.nodes.push(n); refs.push({kind:'node',id:n.id}); });
+  d.texts.forEach(t=>{ t.id=uid('t'); t.x+=dx; t.y+=dy; state.texts.push(t); refs.push({kind:'text',id:t.id}); });
+  let ne=0; d.edges.forEach(e=>{ if(!map[e.a.n]||!map[e.b.n]||e.b.s) return; e.id=uid('e'); e.a.n=map[e.a.n]; e.b.n=map[e.b.n]; delete e.label; // a typed cable ID would now exist twice
+    if(Array.isArray(e.segs)) e.segs=e.segs.map((v,k)=>k%2?v+dy:v+dx); state.edges.push(e); refs.push({kind:'edge',id:e.id}); ne++; });
+  multi=refs.length>1?refs:[]; sel=refs[refs.length-1]||null; pending=null; activeType=null; save(); render(); return true;
+}
+function dupSel(){ const d=clone(gatherSel()); if(emptyClip(d)) return; if(pasteData(d,null,24)) toast('Duplicated '+clipText(d)); }
+function selectGathered(){ const g1=gatherSel(); multi=[...g1.zones.map(z=>({kind:'zone',id:z.id})),...g1.nodes.map(n=>({kind:'node',id:n.id})),...g1.texts.map(t=>({kind:'text',id:t.id})),...g1.edges.map(e=>({kind:'edge',id:e.id}))]; sel=multi[multi.length-1]||null; if(multi.length<2) multi=[]; }
+// cutting a room takes its devices and texts along, exactly as they were copied
+function cutSel(){ const d=copySel(); if(!d) return; selectGathered(); removeSel(); toast('Cut '+clipText(d)+'. Paste with '+MOD+'V.'); }
+function pasteClip(at){ const d=readClip(); if(emptyClip(d)){ toast('Nothing to paste. Copy devices, texts or rooms first.'); return; } pasteN++; if(pasteData(clone(d),at,24*pasteN)) toast('Pasted '+clipText(d)); }
+// Shift + drag: select everything that lies completely inside the frame
+function frameSelect(a,b,add){
+  const r={x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)}, inR=q=>q.x>=r.x&&q.y>=r.y&&q.x+q.w<=r.x+r.w&&q.y+q.h<=r.y+r.h;
+  const refs=add?selRefs():[], has=(k,id)=>refs.some(x=>x.kind===k&&x.id===id), put=(k,id)=>{ if(!has(k,id)) refs.push({kind:k,id}); };
+  state.zones.forEach(z=>{ if(inR(rectOf('zone',z))) put('zone',z.id); });
+  const ids=new Set(); state.nodes.forEach(n=>{ if(inR(rectOf('node',n))){ put('node',n.id); ids.add(n.id); } });
+  state.texts.forEach(t=>{ if(inR(tbox(t))) put('text',t.id); });
+  state.edges.forEach(e=>{ if(!isX(e)&&ids.has(e.a.n)&&ids.has(e.b.n)) put('edge',e.id); });
+  if(!ids.size&&!refs.some(x=>x.kind!=='edge')) document.querySelectorAll('#edges path.hit[data-edge]').forEach(pa=>{ const L=pa.getTotalLength(); for(let d=0;d<=L;d+=6){ const q=pa.getPointAtLength(d); if(q.x>=r.x&&q.x<=r.x+r.w&&q.y>=r.y&&q.y<=r.y+r.h){ put('edge',pa.dataset.edge); break; } } });
+  multi=refs.length>1?refs:[]; sel=refs[refs.length-1]||null; pending=null; activeType=null;
+}
+// the edit menu: right-click, or a long press on a touch screen
+// one popup for the right-click menu, the line menu, the sheet menu and the library menus
+function ckItem(b,label,on){ b.replaceChildren(h('span',{className:'ck',textContent:on?'\u2713':''}),label); b.setAttribute('aria-checked',String(!!on)); }
+function popMenu(x,y,items,anchor){
+  const m=$('ctxMenu'); closeMenus();
+  const host=(anchor&&anchor.closest('dialog'))||document.body; if(m.parentNode!==host) host.appendChild(m); // inside an open dialog the menu has to be part of it
+  m.replaceChildren(...items.filter((o,i,a)=>o||(i&&a[i-1]&&i<a.length-1)).map(o=>{ if(!o) return h('hr');
+    const lab=h('span',{textContent:o.label}); if(o.check!==undefined) lab.prepend(h('span',{className:'ck',textContent:o.check?'\u2713':''}));
+    const b=h('button',{type:'button',className:o.danger?'danger':''},[lab,h('span',{className:'k',textContent:o.key||''})]); b.setAttribute('role',o.check!==undefined?'menuitemcheckbox':'menuitem'); b.disabled=o.on===false;
+    b.addEventListener('click',()=>{ if(o.confirm&&!b.classList.contains('armed')){ b.classList.add('armed'); lab.textContent=o.confirm; return; } m.classList.remove('on'); o.fn(); }); return b; }));
+  m.classList.toggle('hasck',items.some(o=>o&&o.check!==undefined)); m.classList.add('on'); const w=m.offsetWidth, hh=m.offsetHeight;
+  if(anchor){ const r=anchor.getBoundingClientRect(); x=r.left; y=r.bottom+4; if(y+hh>innerHeight-4) y=r.top-hh-4; }
+  m.style.left=Math.max(4,Math.min(x,innerWidth-w-4))+'px'; m.style.top=Math.max(4,Math.min(y,innerHeight-hh-4))+'px';
+  m.tabIndex=-1; m.focus(); // arrow keys move into the menu; no focus ring for a mouse click
+}
+function lineItems(e){ const xs=isX(e), it=[];
+  if(!xs&&!e.ref) it.push({label:'Curved',check:routeOf(e)!=='ortho',fn:()=>$('routeBtn').click()});
+  if(!xs&&!e.ref&&routeOf(e)==='ortho'&&!state.locked){ it.push({label:'Add corner',fn:()=>$('cornerBtn').click()}); if(segsOk(e)||e.bend) it.push({label:'Reset line',fn:()=>$('resetLineBtn').click()}); }
+  if(!xs) it.push({label:'Show as arrows',check:!!e.ref,fn:()=>$('refBtn').click()});
+  if(T[e.type]) it.push(null,{label:'Select all '+T[e.type].label+' cables',fn:()=>$('sameBtn').click()});
+  return it; }
+$('lineBtn').addEventListener('click',ev=>{ if(multi.length>1){ const l=selEdges(); if(l.length) popMenu(0,0,lineItemsMulti(l),ev.currentTarget); return; } const e=sel&&sel.kind==='edge'&&edgeById(sel.id); if(e) popMenu(0,0,lineItems(e),ev.currentTarget); });
+function openCtx(x,y,hitEl){
+  closeMenus();
+  if(hitEl){ const k=hitEl.dataset.node?'node':hitEl.dataset.edge?'edge':hitEl.dataset.text?'text':hitEl.dataset.zone?'zone':null, id=k&&hitEl.dataset[k];
+    if(k&&!isSelected(k,id)){ multi=[]; sel={kind:k,id}; pending=null; render(); } }
+  else if(sel||multi.length){ sel=null; multi=[]; pending=null; render(); } // a right-click on an empty place clears the selection
+  const at=(()=>{ const r=svg.getBoundingClientRect(); return {x:(x-r.left-view.x)/view.k, y:(y-r.top-view.y)/view.k}; })();
+  const refs=selRefs(), objs=refs.some(r=>r.kind!=='edge'), one=refs.length===1?refs[0]:null, node=one&&one.kind==='node'?nodeById(one.id):null, loc=node&&FEATURES.libraryManager?libLocate(node):null;
+  const items=[], it=(label,key,fn,on,o)=>items.push(Object.assign({label,key,fn,on:on!==false},o||{})), canPaste=!emptyClip(readClip()), edge=one&&one.kind==='edge'?edgeById(one.id):null;
+  const copyOps=()=>{ items.push(null); it('Cut',MOD+'X',cutSel,!state.locked); it('Copy',MOD+'C',()=>{ const d=copySel(); if(d) toast('Copied '+clipText(d)); }); it('Paste',MOD+'V',()=>pasteClip(at),canPaste); it('Duplicate',MOD+'D',dupSel); };
+  if(!refs.length){ // empty place on the drawing
+    it('Paste',MOD+'V',()=>pasteClip(at),canPaste); it('Select all',MOD+'A',()=>selectAll());
+    if(!state.locked){ items.push(null); it('Add room here','',()=>{ const z={id:uid('z'),name:'Room '+(state.zones.length+1),x:snap(at.x),y:snap(at.y),w:384,h:240}; state.zones.push(z); multi=[]; sel={kind:'zone',id:z.id}; save(); render(); }); it('Add text here','',()=>openTextEditor(null,at)); }
+    items.push(null); it('Show the whole drawing','F',()=>fit());
+  } else if(edge){
+    it('Edit','',()=>$('editBtn').click()); items.push(null); lineItems(edge).forEach(o=>items.push(o));
+    if(isX(edge)) it($('goSheetBtn').textContent,'',()=>$('goSheetBtn').click());
+    items.push(null); it('Delete','Del',removeSel,true,{danger:true});
+  } else {
+    if(one) it('Edit','',()=>$('editBtn').click());
+    if(node) it('Replace','',()=>$('repBtn').click(),!state.locked);
+    if(node&&loc) it('Edit in the device library','',()=>editInLibrary(node,loc));
+    if(!one&&refs.filter(r=>r.kind==='node').length>1) it('Edit '+refs.filter(r=>r.kind==='node').length+' devices','',()=>$('devsBtn').click());
+    if(!one&&refs.some(r=>r.kind==='edge')){ it($('cablesBtn').textContent,'',()=>$('cablesBtn').click()); const li=lineItemsMulti(selEdges()); if(li.length){ items.push(null); li.forEach(o=>items.push(o)); } }
+    if(objs) copyOps();
+    items.push(null); it('Delete','Del',removeSel,true,{danger:true});
+    if(refs.some(r=>r.kind==='zone')) it(refs.length>1?'Delete with room contents':'Delete room with its contents','',()=>{ selectGathered(); removeSel(); },!state.locked,{danger:true});
+  }
+  popMenu(x,y,items);
+}
+function closeCtx(){ $('ctxMenu').classList.remove('on'); }
+svg.addEventListener('contextmenu',e=>{ e.preventDefault(); if($('ctxMenu').classList.contains('on')&&e.pointerType==='touch') return; const t=e.target.closest&&e.target.closest('[data-node],[data-edge],[data-text],[data-zone]'); openCtx(e.clientX,e.clientY,t); });
+document.addEventListener('pointerdown',e=>{ if(!e.target.closest||!e.target.closest('#ctxMenu')) closeCtx(); },true);
+$('ctxMenu').addEventListener('keydown',e=>{ if(e.key==='Tab'){ e.preventDefault(); closeCtx(); return; } const bs=[...$('ctxMenu').querySelectorAll('button:not(:disabled)')], i=bs.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); const n=bs[(i+(e.key==='ArrowDown'?1:-1)+bs.length)%bs.length]; if(n) n.focus(); }
+  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeCtx(); } });
+function selectAll(){ multi=[...state.nodes.map(n=>({kind:'node',id:n.id})),...state.zones.map(z=>({kind:'zone',id:z.id})),...state.texts.map(t=>({kind:'text',id:t.id})),...liveEdges().map(x=>({kind:'edge',id:x.id}))]; sel=multi.length?multi[multi.length-1]:null; if(multi.length<2) multi=[]; pending=null; render(); }
+// from a placed device to its entry in the device library
+function libLocate(n){
+  let hit=null; const each=fn=>{ for(const g1 of state.lib) for(const c of g1.cats) for(const d of c.devs) if(!hit&&fn(d)) hit={g1,c,d}; };
+  if(n.model) each(d=>d.model===n.model||(d.aliases||[]).includes(n.model));
+  if(!hit) each(d=>d.name===n.name&&(!n.model||!d.model));
+  return hit;
+}
+function editInLibrary(n,loc){
+  if(!loc||!FEATURES.libraryManager) return;
+  if($('props').open) $('props').close(); closeCtx(); $('lib').classList.remove('open');
+  state.libLocked=false; save(); mgrOpenSet.add(loc.g1); mgrClosedCats.delete(loc.c);
+  mgrMsg('Unlocked for this change. The library locks again when you close it.'); $('mgr').showModal(); renderMgr();
+  openEditor(loc.g1,loc.c,loc.d); edCtx.node=n.id;
+}
 
 // edit a device or a connection
 const ZONE_F=[['name','Room name'],['qty','Quantity of this room (the lists count its devices this many times)']];
@@ -1699,7 +1926,7 @@ const NODE_F=[['name','Label on the drawing'],['mfr','Manufacturer'],['model','M
 const EDGE_F=[['label','Cable ID (leave empty for automatic numbering)'],['cable','Cable type (product name, as it should appear in the cable list)'],['len','Length'],['notes','Notes']];
 let prTarget=null, prInputs={}, prCb=null;
 function askText(title,label,value,cb){
-  $('prTitle').textContent=title; const box=$('prFields'); box.replaceChildren(); prInputs={};
+  $('props').querySelectorAll('.foot .fx').forEach(x=>x.remove()); $('prTitle').textContent=title; const box=$('prFields'); box.replaceChildren(); prInputs={};
   const inp=h('input',{type:'text',value:value||'',id:'pr_x'}), l=h('label',{textContent:label}); l.htmlFor='pr_x'; box.appendChild(h('div',null,[l,inp]));
   prCb=()=>{ const v=inp.value.trim(); if(v) cb(v); }; $('props').showModal(); inp.focus();
 }
@@ -1708,6 +1935,19 @@ const CABLE_SUGGEST={fiber:['Fiber patch cable, multimode OM3, LC duplex','Fiber
 function fillCableTypes(types){ syncSheet(); const set=new Set(); (types||[]).forEach(t=>(CABLE_SUGGEST[t]||[]).forEach(v=>set.add(v))); state.sheets.forEach(sh=>sh.edges.forEach(e=>{ const v=(e.cable||'').trim(); if(v) set.add(v); })); $('cableTypes').replaceChildren(...[...set].sort((a,b)=>a.localeCompare(b)).map(v=>h('option',{value:v}))); }
 function field(id,label,inp){ inp.id=id; const l=h('label',{textContent:label}); l.htmlFor=id; return h('div',null,[l,inp]); }
 // several cables at once: a field that differs between the cables stays as it is while it is left empty
+function openDeviceEditor(list){
+  prCb=null; prLoop=null; prTarget=null; prHasColor=false; prInputs={}; prOthers=null;
+  $('prTitle').textContent='Edit '+list.length+' devices';
+  const box=$('prFields'), F=[['mfr','Manufacturer'],['loc','Location detail (rack, position)'],['notes','Notes']], st={}; box.replaceChildren();
+  box.appendChild(h('p',{className:'hint',textContent:'Changes apply to all selected devices: '+cut(list.map(n=>n.name).join(', '),160)+'. Labels and models stay as they are.'}));
+  F.forEach(([k,lab])=>{ const vals=[...new Set(list.map(n=>(n[k]||'').trim()))], mixed=vals.length>1, inp=h('input',{type:'text',value:mixed?'':vals[0]||''});
+    if(mixed) inp.placeholder='Several values. Leave empty to keep them'; st[k]={inp,mixed}; box.appendChild(field('pr_d_'+k,lab,inp)); });
+  const bo=list.filter(n=>n.byOthers).length, sb=h('select',null,[h('option',{value:'',textContent:bo&&bo<list.length?'Keep as it is ('+bo+' of '+list.length+')':'Keep as it is'}),h('option',{value:'yes',textContent:'Yes, all supplied by others'}),h('option',{value:'no',textContent:'No'})]);
+  box.appendChild(field('pr_d_others','Supplied by others',sb));
+  prCb=()=>{ list.forEach(n=>{ F.forEach(([k])=>{ const v=st[k].inp.value.trim().slice(0,200); if(st[k].mixed&&!v) return; if(v) n[k]=v; else delete n[k]; }); if(sb.value==='yes') n.byOthers=true; else if(sb.value==='no') delete n.byOthers; }); save(); render(); toast('Updated '+list.length+' devices'); };
+  $('props').showModal(); st.mfr.inp.focus();
+}
+$('devsBtn').addEventListener('click',()=>{ const list=selRefs().filter(r=>r.kind==='node').map(r=>nodeById(r.id)).filter(Boolean); if(list.length>1) openDeviceEditor(list); });
 function openCableEditor(list){
   prCb=null; prLoop=null; prTarget=null; prHasColor=false; prInputs={}; fillCableTypes(list.map(e=>e.type));
   $('prTitle').textContent=list.length>1?'Edit '+list.length+' cables':'Edit cable';
@@ -1721,7 +1961,8 @@ function openCableEditor(list){
   prCb=()=>{ list.forEach(e=>F.forEach(([k])=>{ const v=st[k].inp.value.trim(); if(st[k].mixed&&!v) return; if(v) e[k]=v; else delete e[k]; })); save(); render(); toast(list.length>1?'Updated '+list.length+' cables':'Cable updated'); };
   $('props').showModal(); st.cable.inp.focus();
 }
-function openTextEditor(t){
+$('props').addEventListener('close',()=>$('props').querySelectorAll('.foot .fx').forEach(x=>x.remove())); // the library button belongs to one device only
+function openTextEditor(t,at){
   prCb=null; prLoop=null; prTarget=null; prHasColor=false; prInputs={};
   $('prTitle').textContent=t?'Edit text':'Add text';
   const box=$('prFields'); box.replaceChildren();
@@ -1734,7 +1975,7 @@ function openTextEditor(t){
   prCb=()=>{
     const v=ta.value.replace(/\r/g,'').replace(/\s+$/,''), sz=Math.min(TSIZE[1],Math.max(TSIZE[0],Math.round(+size.value)||18));
     if(!v.trim()){ if(t){ state.texts=state.texts.filter(x=>x!==t); sel=null; save(); render(); } return; } // an emptied text box is removed
-    let o=t; if(!o){ const r=svg.getBoundingClientRect(); o={id:uid('t'),text:'',x:0,y:0,font:'legible',size:sz,color:''}; state.texts.push(o); const off=((state.texts.length-1)%6)*24; o.x=snap((r.width/2-view.x)/view.k-60+off); o.y=snap((r.height/2-view.y)/view.k-sz+off); }
+    let o=t; if(!o){ const r=svg.getBoundingClientRect(); o={id:uid('t'),text:'',x:0,y:0,font:'legible',size:sz,color:''}; state.texts.push(o); const off=((state.texts.length-1)%6)*24; o.x=snap((r.width/2-view.x)/view.k-60+off); o.y=snap((r.height/2-view.y)/view.k-sz+off); if(at){ o.x=snap(at.x); o.y=snap(at.y); } }
     Object.assign(o,{text:v.slice(0,2000),font:font.value,size:sz,color:prColor}); if(bold.checked) o.bold=true; else delete o.bold;
     multi=[]; sel={kind:'text',id:o.id}; save(); render();
   };
@@ -1744,13 +1985,17 @@ $('editBtn').addEventListener('click',()=>{
   if(!sel) return; prCb=null; prLoop=null; prOthers=null;
   if(sel.kind==='text'){ const t=textById(sel.id); if(t) openTextEditor(t); return; }
   const kind=sel.kind, F=kind==='node'?NODE_F:kind==='zone'?ZONE_F:EDGE_F; prTarget=kind==='node'?nodeById(sel.id):kind==='zone'?zoneById(sel.id):edgeById(sel.id); if(!prTarget) return;
-  $('prTitle').textContent=kind==='node'?'Edit device':kind==='zone'?'Edit room':'Edit connection'; prHasColor=kind!=='edge';
+  $('props').querySelectorAll('.foot .fx').forEach(x=>x.remove());
+  $('prTitle').textContent=kind==='node'?'Edit device':kind==='zone'?'Edit room':'Edit cable'; prHasColor=kind!=='edge';
   const box=$('prFields'); box.replaceChildren(); prInputs={};
   F.forEach(([k,lab])=>{ const inp=h('input',{type:'text',value:prTarget[k]||'',id:'pr_'+k}); const l=h('label',{textContent:lab}); l.htmlFor='pr_'+k; prInputs[k]=inp; box.appendChild(h('div',null,[l,inp])); });
   if(kind==='node'&&prTarget.ports.some(p=>p.dir==='in')&&prTarget.ports.some(p=>p.dir==='out')){ prLoop=h('input',{type:'checkbox',checked:!!prTarget.loop}); box.appendChild(h('label',{className:'check'},[prLoop,'Allow connections between this device’s own outputs and inputs'])); }
   if(kind==='edge'){ fillCableTypes([prTarget.type]); prInputs.cable.setAttribute('list','cableTypes'); prInputs.cable.placeholder=prTarget.type==='fiber'?'e.g. multimode OM4, LC duplex':'e.g. HDMI 2.1 cable, 3 m'; }
-  if(kind==='node'){ prOthers=h('input',{type:'checkbox',checked:!!prTarget.byOthers}); box.appendChild(h('label',{className:'check'},[prOthers,'Supplied by others (dashed on the drawing, own column in the lists)'])); }
+  if(kind==='node'){ prOthers=h('input',{type:'checkbox',checked:!!prTarget.byOthers}); const lo=h('label',{className:'check'},[prOthers,'Supplied by others']); lo.title='Drawn dashed and listed in its own column'; box.appendChild(lo); }
   if(kind==='node'){ const rm=roomOf(prTarget); prInputs.loc.placeholder=rm?'The room “'+rm+'” is added automatically':'e.g. Rack 1'; }
+  if(kind==='node'&&FEATURES.libraryManager){ const n=prTarget, loc=libLocate(n);
+    if(loc){ const b=h('button',{type:'button',className:'btn fx',textContent:'Edit in library'}); b.title='Open “'+loc.d.name+'” in the device library ('+loc.g1.name+' › '+loc.c.name+'): change its connectors or details, then update this device'; b.addEventListener('click',()=>editInLibrary(n,loc)); $('props').querySelector('.foot').prepend(b); }
+    else box.appendChild(h('p',{className:'libnote2',textContent:'Not in the device library (custom device or renamed model).'})); }
   if(prHasColor) box.appendChild(swatchRow(prTarget.color,kind==='node'?'Block colour':'Frame colour'));
   $('props').showModal();
 });
@@ -1810,7 +2055,7 @@ function drawEditor(){
 }
 const edLists=()=>[...$('edPorts').querySelectorAll('.plist')];
 const edList=dir=>$('edPorts').querySelector('.plist[data-dir="'+(dir==='in'?'in':'out')+'"]');
-function edCounts(){ edLists().forEach(l=>{ const n=l.children.length; l.parentNode.querySelector('h3 span').textContent=(n?n+' · ':'')+(l.dataset.dir==='in'?'left side':'right side'); }); }
+function edCounts(){ edLists().forEach(l=>{ const n=l.children.length; l.parentNode.querySelector('h3 .pn').textContent=(n?n+' · ':'')+(l.dataset.dir==='in'?'left side':'right side'); }); }
 // the order on screen is the order of the device: read it back after every move
 function edSync(){ const ps=[]; edLists().forEach(l=>[...l.children].forEach(r=>{ r._p.dir=l.dataset.dir; ps.push(r._p); r._side(); })); ed.ports=ps; edCounts(); }
 function portRow(p){
@@ -1819,12 +2064,13 @@ function portRow(p){
   name.addEventListener('input',()=>{ p.name=name.value; });
   const typ=h('select',null,TYPES.map(t=>h('option',{value:t.id,textContent:t.label}))); typ.value=p.type; typ.setAttribute('aria-label','Signal type');
   typ.addEventListener('change',()=>{ p.type=typ.value; });
-  const side=h('button',{type:'button'}), rm=h('button',{type:'button',textContent:'\u00d7',title:'Remove'});
-  const row=h('div',{className:'prow'},[grip,name,typ,side,rm]); row._p=p;
+  const side=h('button',{type:'button'}), rm=h('button',{type:'button',textContent:'\u00d7',title:'Remove'}), dup=h('button',{type:'button',textContent:'\u29c9',title:'Duplicate (Ctrl+D)'});
+  const row=h('div',{className:'prow'},[grip,name,typ,dup,side,rm]); row._p=p;
+  dup.addEventListener('click',()=>edDupRow(row)); row.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='d'){ e.preventDefault(); e.stopPropagation(); edDupRow(row); } });
   row._side=()=>{ const inn=p.dir==='in'; side.textContent=inn?'\u2192':'\u2190'; side.title=inn?'Move to outputs':'Move to inputs';
     side.setAttribute('aria-label',side.title); name.setAttribute('aria-label',(inn?'Input':'Output')+' label');
     grip.setAttribute('aria-label','Move '+(inn?'input':'output')+' '+(p.name||T[p.type].label)+'. Arrow keys up and down change the order, left and right the side');
-    rm.setAttribute('aria-label','Remove '+(inn?'input':'output')+' '+(p.name||T[p.type].label)); };
+    rm.setAttribute('aria-label','Remove '+(inn?'input':'output')+' '+(p.name||T[p.type].label)); dup.setAttribute('aria-label','Duplicate '+(inn?'input':'output')+' '+(p.name||T[p.type].label)); };
   row._side();
   side.addEventListener('click',()=>{ const to=edList(p.dir==='in'?'out':'in'); to.appendChild(row); edSync(); side.focus(); });
   rm.addEventListener('click',()=>{ row.remove(); edSync(); });
@@ -1864,16 +2110,17 @@ function edClean(){
 }
 function parseDevice(o,where){
   if(!o||typeof o.name!=='string'||!o.name.trim()||!Array.isArray(o.ports)) throw new Error(where+'expected “name” and a list “ports”.');
+  if(o.ports.length>256) throw new Error(where+'more than 256 connectors.');
   const ports=o.ports.map((p,i)=>{
     if(!p||(p.dir!=='in'&&p.dir!=='out')) throw new Error(where+'connector '+(i+1)+': “dir” must be “in” or “out”.');
     if(!T[p.type]) throw new Error(where+'connector '+(i+1)+': unknown signal type. Allowed: '+TYPES.map(t=>t.id).join(', ')+'.');
-    return P(String(p.name||T[p.type].label),p.dir,p.type);
+    return P(String(p.name||T[p.type].label).slice(0,80),p.dir,p.type);
   });
-  const d={name:o.name.trim(),ports}, str=k=>typeof o[k]==='string'&&o[k].trim()?o[k].trim():'';
+  const d={name:o.name.trim().slice(0,200),ports}, str=k=>typeof o[k]==='string'&&o[k].trim()?o[k].trim().slice(0,200):'';
   ['mfr','model','desc'].forEach(k=>{ if(str(k)) d[k]=str(k); });
   const st=str('status').toLowerCase(); d.status=!ports.length?'pending':(st==='verified'||st==='draft')?st:undefined; if(!d.status) delete d.status;
   if(o.loop===true||/^(yes|true|1|x)$/i.test(String(o.loop==null?'':o.loop).trim())) d.loop=true;
-  return {d,group:str('group')||str('brand'),category:str('category')||str('cat')};
+  return {d,group:(str('group')||str('brand')).slice(0,120),category:(str('category')||str('cat')).slice(0,120)};
 }
 const flatLib=groups=>groups.flatMap(g1=>((g1&&g1.cats)||[]).flatMap(c=>((c&&c.devs)||[]).map(d=>Object.assign({},d,{group:g1.name,category:c.name}))));
 function importDevices(arr,dg,dc,official){
@@ -1916,6 +2163,18 @@ function openEditor(g1,c,dev){
 ['Name','Mfr','Model','Desc'].forEach(k=>$('ed'+k).addEventListener('input',()=>{ ed[k.toLowerCase()]=$('ed'+k).value; }));
 $('edStatus').addEventListener('change',()=>{ ed.status=$('edStatus').value; });
 $('edLoop').addEventListener('change',()=>{ ed.loop=$('edLoop').checked; });
+// a copy of a connector goes right below it; a number at the end of the name counts up to the next free one
+function nextName(nm){ const used=new Set(ed.ports.map(q=>q.name)), m=/^(.*?)(\d+)(\D*)$/.exec(nm||'');
+  if(!m) { let k=2; while(used.has((nm||'')+' '+k)) k++; return nm?nm+' '+k:''; }
+  let k=+m[2]+1; while(used.has(m[1]+k+m[3])) k++; return m[1]+k+m[3]; }
+function edDupRow(row){ const p=row._p, c=P(nextName(p.name),p.dir,p.type), r=portRow(c); ed.ports.push(c); row.after(r); edSync(); const i=r.querySelector('input'); i.focus(); i.select(); }
+const PCLIP='avlynx.ports.v1';
+function readPorts(){ try{ const a=JSON.parse(localStorage.getItem(PCLIP)||'null'); if(Array.isArray(a)) return a.filter(q=>q&&T[q.type]).slice(0,200).map(q=>({name:String(q.name||'').slice(0,60),type:q.type})); }catch(_){} return []; }
+function edPortMenu(btn){ const dir=btn.dataset.dir, word=dir==='in'?'inputs':'outputs', own=ed.ports.filter(q=>q.dir===dir), clip=readPorts();
+  popMenu(0,0,[{label:'Copy all '+word+(own.length?' ('+own.length+')':''),on:own.length>0,fn:()=>{ try{ localStorage.setItem(PCLIP,JSON.stringify(own.map(q=>({name:q.name,type:q.type})))); }catch(_){} toast('Copied '+own.length+' '+(own.length>1?'connectors':'connector')+'. Paste them here or into another device.'); }},
+    {label:clip.length?'Paste '+clip.length+' '+(clip.length>1?'connectors':'connector')+' as '+word:'Paste',on:clip.length>0,fn:()=>{ const l=edList(dir); clip.forEach(q=>{ const c=P(ed.ports.some(x=>x.name===q.name)?nextName(q.name):q.name,dir,q.type); ed.ports.push(c); l.appendChild(portRow(c)); }); edSync(); }},
+    null,{label:'Remove all '+word,danger:true,on:own.length>0,confirm:'Remove '+own.length+' '+word+'? '+TAP+' again',fn:()=>{ edList(dir).replaceChildren(); edSync(); }}],btn); }
+document.querySelectorAll('#edPorts .pmenu').forEach(b=>b.addEventListener('click',()=>edPortMenu(b)));
 const edAddPort=dir=>{ const p=P('',dir,activeType||'hdmi'); ed.ports.push(p); const r=portRow(p); edList(dir).appendChild(r); edSync(); r.querySelector('input').focus(); };
 $('edAdd').addEventListener('click',()=>edAddPort('in'));
 $('edAddOut').addEventListener('click',()=>edAddPort('out'));
@@ -1937,7 +2196,12 @@ $('edSave').addEventListener('click',()=>{
   if(!d.ports.length){ err.textContent='Add at least one connector.'; return; }
   if(edCtx.project){ $('editor').close(); addDevice(d); toast('Added “'+d.name+'” to the drawing. It is not saved in the library.'); return; }
   if(edCtx.dev&&edCtx.c.devs.includes(edCtx.dev)) edCtx.c.devs[edCtx.c.devs.indexOf(edCtx.dev)]=d; else edCtx.c.devs.push(d);
-  save(); renderLib(); renderMgr(); $('editor').close(); toast('Saved “'+d.name+'” in the library');
+  const from=edCtx.node&&nodeById(edCtx.node);
+  save(); renderLib(); renderMgr(); $('editor').close();
+  if(from){ const key=x=>(x.model||'')+'|'+x.name, others=state.sheets.reduce((k,sh)=>k+sheetArr(sh,'nodes').filter(m=>m!==from&&key(m)===key(from)).length,0);
+    if(edCtx.dev&&from.name===edCtx.dev.name) from.name=d.name; // a renamed library device renames this one too
+    replacing=from.id; replaceDevice(d,'Saved “'+d.name+'” in the library and updated this device on the drawing.'+(others?' '+others+' other '+(others>1?'copies of it stay':'copy of it stays')+' as they were; use Replace to update '+(others>1?'them':'it')+'.':'')); return; }
+  toast('Saved “'+d.name+'” in the library');
 });
 
 function openCustomDevice(){
@@ -2050,7 +2314,7 @@ $('mgr').addEventListener('close',()=>{ if(!state.libLocked){ state.libLocked=tr
 $('mgCollapse').addEventListener('click',()=>{ const all=state.lib.flatMap(g1=>g1.cats), anyOpen=all.some(c=>!mgrClosedCats.has(c)); mgrClosedCats.clear(); if(anyOpen) all.forEach(c=>mgrClosedCats.add(c)); state.lib.forEach(g1=>mgrOpenSet.add(g1)); renderMgr(); });
 $('lockBtn').addEventListener('click',()=>{ state.libLocked=!state.libLocked; save(); mgrMsg(state.libLocked?'The library is locked. Use the lock to edit it.':'Unlocked. Drag the dotted handles to reorder or move entries.'); renderMgr(); });
 $('mgAddGroup').addEventListener('click',()=>askText('New group','Group name, e.g. a brand','',v=>{ const g1={name:v,cats:[]}; state.lib.unshift(g1); mgrOpenSet.add(g1); libChanged(); }));
-armed($('mgReset'),'Reset to defaults',()=>{ state.lib=defaultLib(); state.libStamp=BAKED?BAKED.stamp:0; mgrOpenSet.clear(); libChanged(); mgrMsg('The library is back to the built-in defaults.'); });
+$('mgReset').addEventListener('click',()=>{ state.lib=defaultLib(); state.libStamp=BAKED?BAKED.stamp:0; mgrOpenSet.clear(); libChanged(); mgrMsg('The library is back to the built-in defaults.'); });
 const portStr=(d,dir)=>d.ports.filter(p=>p.dir===dir).map(p=>p.name+':'+p.type).join('; ');
 $('mgExpJson').addEventListener('click',()=>saveFile('AVLYNX-library_'+stampName(true)+'.json',JSON.stringify({app:APP.name,type:'library',version:1,stamp:Date.now(),groups:state.lib},null,1),'application/json'));
 $('mgExpXlsx').addEventListener('click',()=>{
@@ -2074,6 +2338,11 @@ function rowToDev(row,i){
   return {group:get('group','brand'),category:get('category'),name,mfr:get('manufacturer','mfr'),model,desc:get('description'),status:get('status'),loop:get('loop'),ports:[...parsePorts(get('inputs'),'in',where),...parsePorts(get('outputs'),'out',where)]};
 }
 $('mgImport').addEventListener('click',()=>$('mgrFile').click());
+$('mgExport').addEventListener('click',ev=>popMenu(0,0,[{label:'Export as JSON',fn:()=>$('mgExpJson').click()},{label:'Export as Excel',fn:()=>$('mgExpXlsx').click()}],ev.currentTarget));
+$('mgMore').addEventListener('click',ev=>{ const open=state.lib.flatMap(g1=>g1.cats).some(c=>!mgrClosedCats.has(c));
+  popMenu(0,0,[{label:open?'Collapse all categories':'Expand all categories',fn:()=>$('mgCollapse').click()},
+    readBackup()?{label:'Undo library update',confirm:'Undo the update? '+TAP+' again',fn:()=>$('mgUndoUpd').click()}:null,
+    !state.libLocked?{label:'Reset to defaults',danger:true,confirm:'Replace the library? '+TAP+' again',fn:()=>$('mgReset').click()}:null].filter(Boolean),ev.currentTarget); });
 $('mgrFile').addEventListener('change',async()=>{
   const f=$('mgrFile').files[0]; if(!f) return;
   try{
@@ -2382,17 +2651,19 @@ function cleanDoc(d){
   return o;
 }
 function cleanLib(lib){
-  return (Array.isArray(lib)?lib:[]).filter(g1=>g1&&typeof g1.name==='string'&&Array.isArray(g1.cats)).map(g1=>({name:g1.name,cats:g1.cats.filter(c=>c&&typeof c.name==='string'&&Array.isArray(c.devs)).map(c=>({name:c.name,devs:c.devs.filter(d=>d&&typeof d.name==='string'&&Array.isArray(d.ports)).map(d=>{
-    const o={name:d.name,ports:d.ports.filter(p=>p&&T[p.type]&&(p.dir==='in'||p.dir==='out')).map(p=>P(String(p.name==null?'':p.name),p.dir,p.type))};
-    ['mfr','model','desc','status'].forEach(k=>{ if(typeof d[k]==='string'&&d[k]) o[k]=d[k]; }); if(d.loop===true) o.loop=true;
-    if(Array.isArray(d.aliases)){ const al=d.aliases.filter(a=>typeof a==='string'&&a.trim()).map(a=>a.trim()).slice(0,20); if(al.length) o.aliases=al; } return o;
+  return (Array.isArray(lib)?lib:[]).filter(g1=>g1&&typeof g1.name==='string'&&Array.isArray(g1.cats)).map(g1=>({name:g1.name.slice(0,120),cats:g1.cats.filter(c=>c&&typeof c.name==='string'&&Array.isArray(c.devs)).map(c=>({name:c.name.slice(0,120),devs:c.devs.filter(d=>d&&typeof d.name==='string'&&Array.isArray(d.ports)).map(d=>{
+    const o={name:d.name.slice(0,200),ports:d.ports.filter(p=>p&&T[p.type]&&(p.dir==='in'||p.dir==='out')).slice(0,256).map(p=>P(String(p.name==null?'':p.name).slice(0,80),p.dir,p.type))};
+    ['mfr','model','desc','status'].forEach(k=>{ if(typeof d[k]==='string'&&d[k]) o[k]=d[k].slice(0,200); }); if(d.loop===true) o.loop=true;
+    if(Array.isArray(d.aliases)){ const al=d.aliases.filter(a=>typeof a==='string'&&a.trim()).map(a=>a.trim().slice(0,80)).slice(0,20); if(al.length) o.aliases=al; } return o;
   })}))}));
 }
 function checkSheet(o){
   if(!o||!Array.isArray(o.nodes)||!Array.isArray(o.edges)) throw new Error('This file is not an AVLYNX project.');
   const ids=new Set();
+  if(o.nodes.length>5000||o.edges.length>20000) throw new Error('This project is too large: a sheet can hold up to 5000 devices and 20000 cables.');
   o.nodes.forEach((n,i)=>{
     if(!n||typeof n.id!=='string'||typeof n.name!=='string'||!isFinite(n.x)||!isFinite(n.y)||!Array.isArray(n.ports)) throw new Error('Device '+(i+1)+' in this project is incomplete.');
+    if(n.ports.length>256) throw new Error('Device “'+n.name.slice(0,40)+'” has more than 256 connectors.');
     n.ports.forEach(p=>{ retype(p); if(!p||!T[p.type]||(p.dir!=='in'&&p.dir!=='out')) throw new Error('Device “'+n.name+'” has a connector this version does not know.'); });
     ids.add(n.id);
   });
@@ -2402,13 +2673,16 @@ function checkSheet(o){
   const zones=(Array.isArray(o.zones)?o.zones:[]).filter(z=>z&&isFinite(z.x)&&isFinite(z.y)&&z.w>0&&z.h>0).map(z=>Object.assign({id:String(z.id||uid('z')),name:String(z.name||'Room'),x:+z.x,y:+z.y,w:+z.w,h:+z.h},typeof z.color==='string'?{color:z.color}:{},Number.isInteger(+z.qty)&&+z.qty>1?{qty:Math.min(999,+z.qty)}:{}));
   if(ids.size!==o.nodes.length) throw new Error('This project contains the same device twice.');
   const isCol=c=>typeof c==='string'&&/^#[0-9a-f]{6}$/i.test(c), strs=(x,ks)=>ks.forEach(k=>{ if(x[k]!==undefined&&typeof x[k]!=='string') delete x[k]; });
-  o.nodes.forEach(n=>{ if(!isCol(n.color)) delete n.color; strs(n,['mfr','model','loc','notes']); if(n.loop!==true) delete n.loop; if(n.byOthers!==true) delete n.byOthers; n.x=+n.x; n.y=+n.y; n.ports.forEach(p=>{ p.name=String(p.name==null?'':p.name); }); });
-  zones.forEach(z=>{ if(!isCol(z.color)) delete z.color; });
+  // limits keep a manipulated file from slowing the drawing down: coordinates within ±1,000,000, texts of sensible length
+  const C=v=>Math.max(-1e6,Math.min(1e6,+v)), L=(x,k,n)=>{ if(typeof x[k]==='string'&&x[k].length>n) x[k]=x[k].slice(0,n); };
+  o.nodes.forEach(n=>{ if(!isCol(n.color)) delete n.color; strs(n,['mfr','model','loc','notes']); if(n.loop!==true) delete n.loop; if(n.byOthers!==true) delete n.byOthers; n.x=C(n.x); n.y=C(n.y);
+    L(n,'name',200); L(n,'mfr',200); L(n,'model',200); L(n,'loc',200); L(n,'notes',2000); n.ports.forEach(p=>{ p.name=String(p.name==null?'':p.name).slice(0,80); }); });
+  zones.forEach(z=>{ if(!isCol(z.color)) delete z.color; z.x=C(z.x); z.y=C(z.y); z.w=Math.min(1e6,z.w); z.h=Math.min(1e6,z.h); L(z,'name',200); });
   const okEnd=r=>{ const n=o.nodes.find(x=>x.id===r.n); return Number.isInteger(r.p)&&!!n.ports[r.p]; };
   const good=edges.filter(e=>T[e.type]&&typeof e.id==='string'&&okEnd(e.a)&&okEnd(e.b));
-  good.forEach(e=>{ strs(e,['label','cable','len','notes']); if(e.ref!==true) delete e.ref; if(typeof e.bend!=='number'||!isFinite(e.bend)) delete e.bend; if(!segsOk(e)) delete e.segs; else e.segs=e.segs.map(Math.round); if(e.route!=='ortho'&&e.route!=='curve') delete e.route; });
+  good.forEach(e=>{ strs(e,['label','cable','len','notes']); L(e,'label',40); L(e,'cable',200); L(e,'len',40); L(e,'notes',2000); if(Array.isArray(e.segs)) e.segs=e.segs.map(v=>typeof v==='number'?C(v):v); if(e.ref!==true) delete e.ref; if(typeof e.bend!=='number'||!isFinite(e.bend)) delete e.bend; if(!segsOk(e)) delete e.segs; else e.segs=e.segs.map(Math.round); if(e.route!=='ortho'&&e.route!=='curve') delete e.route; });
   const FONTS=Object.keys(TFONT), texts=(Array.isArray(o.texts)?o.texts:[]).filter(t=>t&&typeof t.text==='string'&&isFinite(t.x)&&isFinite(t.y)).slice(0,2000).map(t=>{
-    const r={id:typeof t.id==='string'&&t.id?t.id:uid('t'),text:t.text.slice(0,2000),x:+t.x,y:+t.y,font:FONTS.includes(t.font)?t.font:FONT_OLD[t.font]||'legible',size:Math.min(TSIZE[1],Math.max(TSIZE[0],Math.round(+t.size)||16)),color:isCol(t.color)?t.color:''};
+    const r={id:typeof t.id==='string'&&t.id?t.id:uid('t'),text:t.text.slice(0,2000),x:C(t.x),y:C(t.y),font:FONTS.includes(t.font)?t.font:FONT_OLD[t.font]||'legible',size:Math.min(TSIZE[1],Math.max(TSIZE[0],Math.round(+t.size)||16)),color:isCol(t.color)?t.color:''};
     if(t.bold===true) r.bold=true; return r; });
   const xedges=o.edges.filter(e=>e&&e.a&&e.b&&typeof e.b.s==='string'&&ids.has(e.a.n));
   return {nodes:o.nodes,edges:good,zones,texts,xedges};
@@ -2437,12 +2711,18 @@ function renderSheets(){
   state.sheets.forEach((sh,i)=>{ const b=h('button',{className:'tab',type:'button',textContent:sh.name}); if(i===state.cur) b.setAttribute('aria-current','true'); b.addEventListener('click',()=>goSheet(i)); bar.appendChild(b); });
   const add=h('button',{className:'tab',type:'button',textContent:'+ Sheet'}); add.setAttribute('aria-label','Add a sheet');
   add.addEventListener('click',()=>{ syncSheet(); state.sheets.push({id:uid('s'),name:'Sheet '+(state.sheets.length+1),nodes:[],edges:[],zones:[],texts:[]}); goSheet(state.sheets.length-1,true); });
-  const ren=h('button',{className:'mini',type:'button',textContent:'Rename'});
-  ren.addEventListener('click',()=>askText('Rename sheet','Sheet name',state.sheets[state.cur].name,v=>{ state.sheets[state.cur].name=v.slice(0,60); persist(); renderSheets(); }));
-  const del=h('button',{className:'mini danger',type:'button',textContent:'Delete sheet'}); del.disabled=state.sheets.length<2;
-  armed(del,'Delete sheet',()=>{ syncSheet(); const gone=state.sheets[state.cur].id; state.sheets.splice(state.cur,1); state.sheets.forEach(sh=>{ sh.edges=sh.edges.filter(e=>!(isX(e)&&e.b.s===gone)); }); useSheet(Math.min(state.cur,state.sheets.length-1)); afterSheet(); });
-  bar.append(add,h('span',{className:'sp'}),ren,del);
+  const tabs=[...bar.querySelectorAll('.tab[aria-current]')], cur=tabs[0];
+  const mb=h('button',{className:'tabm',type:'button',textContent:'\u22ef'}); mb.setAttribute('aria-label','Sheet actions: rename, duplicate, delete'); mb.title='Rename, duplicate or delete this sheet'; mb.addEventListener('click',()=>sheetMenu(mb));
+  if(cur){ cur.after(mb); cur.title='Double-click to rename'; cur.addEventListener('dblclick',renameSheet); cur.addEventListener('contextmenu',e=>{ e.preventDefault(); sheetMenu(cur); }); }
+  bar.append(add);
 }
+function renameSheet(){ askText('Rename sheet','Sheet name',state.sheets[state.cur].name,v=>{ state.sheets[state.cur].name=v.slice(0,60); persist(); renderSheets(); }); }
+function dupSheet(){ syncSheet(); const sh=state.sheets[state.cur], c=clone(sh), map={};
+  c.id=uid('s'); c.name=(sh.name+' copy').slice(0,60); c.nodes.forEach(n=>{ map[n.id]=uid('n'); n.id=map[n.id]; }); c.zones.forEach(z=>{ z.id=uid('z'); }); c.texts.forEach(t=>{ t.id=uid('t'); });
+  c.edges=c.edges.filter(e=>!e.b.s&&map[e.a.n]&&map[e.b.n]).map(e=>Object.assign(e,{id:uid('e'),a:Object.assign(e.a,{n:map[e.a.n]}),b:Object.assign(e.b,{n:map[e.b.n]})}));
+  c.edges.forEach(e=>delete e.label); state.sheets.splice(state.cur+1,0,c); goSheet(state.cur+1,true); toast('Sheet duplicated. Cables to other sheets and custom cable IDs are not copied.'); }
+function delSheet(){ syncSheet(); const gone=state.sheets[state.cur].id; state.sheets.splice(state.cur,1); state.sheets.forEach(sh=>{ sh.edges=sh.edges.filter(e=>!(isX(e)&&e.b.s===gone)); }); useSheet(Math.min(state.cur,state.sheets.length-1)); afterSheet(); }
+function sheetMenu(anchor){ popMenu(0,0,[{label:'Rename',fn:renameSheet},{label:'Duplicate',fn:dupSheet},null,{label:'Delete sheet',danger:true,on:state.sheets.length>1,confirm:'Delete “'+cut(state.sheets[state.cur].name,20)+'”? '+TAP+' again',fn:delSheet}],anchor); }
 function guard(btn,label,fn){
   btn.addEventListener('click',()=>{
     if(!anyContent()||btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; fn(); return; }
@@ -2525,7 +2805,7 @@ function undoUpdate(){
   persist(); renderLib(); renderMgr(); showUpdate(); showUndo(); $('wlUndoBtn').hidden=true;
   const msg='The library is back to the state before the update.'; toast(msg); mgrMsg(msg);
 }
-armed($('mgUndoUpd'),'Undo library update',undoUpdate);
+$('mgUndoUpd').addEventListener('click',undoUpdate);
 $('wlUndoBtn').addEventListener('click',undoUpdate);
 function offerUpdate(u){ if(!u||!Array.isArray(u.groups)||!(u.stamp>(state.libStamp||0))) return; if(!libUpdate||u.stamp>libUpdate.stamp) libUpdate=u; showUpdate(); }
 function applyUpdate(quiet){
