@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.1 – 24 November 2026
+
+**Cable bundles**
+- Many cables of one signal type between the same devices can now run as a bundle: each cable leaves its device on a short branch, all of them share one run, and they split again just before the far device. A tag on the shared run shows the number of cables.
+- Right-click a device, then Bundle its cables: one bundle for each signal type on each side of the device. Or select several lines and choose Line ▾, then Bundle N lines (one bundle per signal type).
+- Drag the round handle of a bundle to move its shared run; Reset bundle route puts it back. Right-click a bundled line for Select whole bundle and Remove from bundle; Unbundle turns the lines back into single lines.
+- Bundles follow when devices move and lead between device blocks. Lines in one bundle do not jump over each other, and cable IDs stay on the branches. The PDF export shows bundles as on the screen.
+- Copied and duplicated devices get their own bundle. Bundle data in opened files is checked like all other values.
+
+**Fixes**
+- Dragging near the edge of the drawing scrolls only towards the edge the pointer moved to, so a selection frame started close to an edge no longer moves the view.
+
 ## 1.3.0 – 24 November 2026
 
 **Working with several objects**
