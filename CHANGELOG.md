@@ -9,6 +9,11 @@
 - Bundles follow when devices move and lead between device blocks. Lines in one bundle do not jump over each other, and cable IDs stay on the branches. The PDF export shows bundles as on the screen.
 - Copied and duplicated devices get their own bundle. Bundle data in opened files is checked like all other values.
 
+**Page orientation**
+- Project details offer Orientation next to the PDF page size: Landscape or Portrait.
+- Each sheet can have its own orientation (⋯ next to the sheet name, then Landscape page or Portrait page), so one PDF can mix landscape and portrait pages.
+- The Export menu names the page size and orientation. On narrow pages the legend continues on a second line, and the company name in the title block gets smaller type instead of being cut.
+
 **Fixes**
 - Dragging near the edge of the drawing scrolls only towards the edge the pointer moved to, so a selection frame started close to an edge no longer moves the view.
 
