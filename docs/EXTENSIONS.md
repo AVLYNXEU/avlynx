@@ -4,7 +4,7 @@ AVLYNX stays one generic editor. A company can build its own edition from the sa
 
 ## Build switches
 
-`src/avlynx-source.html` contains placeholders of the form `/*@NAME@*/`. A company build script replaces them before running `build/build.py`. Without a build script, every switch keeps its default.
+`src/avlynx-source.html` and the release file `index.html` contain placeholders of the form `/*@NAME@*/`. `build/company-build.py` fills in `EDITION`, `COMPANY`, `BAKED_LIBRARY`, `ACCENT` and `FEATURES` in a release file; the [administrator guide](ADMIN-GUIDE.md#7-building-a-company-edition) describes its options. Without a build, every switch keeps its default.
 
 | Placeholder | Default | Purpose |
 | --- | --- | --- |

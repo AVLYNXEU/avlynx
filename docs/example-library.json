@@ -1,0 +1,249 @@
+{
+ "app": "AVLYNX",
+ "type": "library",
+ "version": 1,
+ "stamp": 1795600000000,
+ "groups": [
+  {
+   "name": "Example AV",
+   "cats": [
+    {
+     "name": "Switching",
+     "devs": [
+      {
+       "name": "Switcher 4×1",
+       "mfr": "Example AV",
+       "model": "EX-SW41",
+       "desc": "4×1 HDMI switcher with RS-232 control",
+       "status": "verified",
+       "ports": [
+        {
+         "name": "HDMI In 1",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 2",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 3",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 4",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "RS-232",
+         "dir": "in",
+         "type": "rs232"
+        },
+        {
+         "name": "HDMI Out",
+         "dir": "out",
+         "type": "hdmi"
+        }
+       ]
+      },
+      {
+       "name": "Matrix 4×4",
+       "mfr": "Example AV",
+       "model": "EX-MX44",
+       "desc": "4×4 HDMI matrix",
+       "status": "draft",
+       "loop": true,
+       "aliases": [
+        "EX-MX44-V2"
+       ],
+       "ports": [
+        {
+         "name": "HDMI In 1",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 2",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 3",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI In 4",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "LAN",
+         "dir": "in",
+         "type": "lan"
+        },
+        {
+         "name": "HDMI Out 1",
+         "dir": "out",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI Out 2",
+         "dir": "out",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI Out 3",
+         "dir": "out",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDMI Out 4",
+         "dir": "out",
+         "type": "hdmi"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Extenders",
+     "devs": [
+      {
+       "name": "HDBaseT transmitter",
+       "mfr": "Example AV",
+       "model": "EX-HDBT100 (TX)",
+       "desc": "HDMI over HDBaseT, 100 m",
+       "status": "verified",
+       "ports": [
+        {
+         "name": "HDMI In",
+         "dir": "in",
+         "type": "hdmi"
+        },
+        {
+         "name": "HDBaseT Out",
+         "dir": "out",
+         "type": "hdbt"
+        }
+       ]
+      },
+      {
+       "name": "HDBaseT receiver",
+       "mfr": "Example AV",
+       "model": "EX-HDBT100 (RX)",
+       "desc": "HDMI over HDBaseT, 100 m",
+       "status": "verified",
+       "ports": [
+        {
+         "name": "HDBaseT In",
+         "dir": "in",
+         "type": "hdbt"
+        },
+        {
+         "name": "HDMI Out",
+         "dir": "out",
+         "type": "hdmi"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Audio",
+     "devs": [
+      {
+       "name": "DSP 4×4 Dante",
+       "mfr": "Example AV",
+       "model": "EX-DSP44",
+       "desc": "Audio DSP, 4 analog in, 4 analog out, Dante",
+       "status": "verified",
+       "ports": [
+        {
+         "name": "Mic/Line 1",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Mic/Line 2",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Mic/Line 3",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Mic/Line 4",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Dante",
+         "dir": "in",
+         "type": "dante"
+        },
+        {
+         "name": "Line Out 1",
+         "dir": "out",
+         "type": "audio"
+        },
+        {
+         "name": "Line Out 2",
+         "dir": "out",
+         "type": "audio"
+        },
+        {
+         "name": "Line Out 3",
+         "dir": "out",
+         "type": "audio"
+        },
+        {
+         "name": "Line Out 4",
+         "dir": "out",
+         "type": "audio"
+        }
+       ]
+      },
+      {
+       "name": "Amplifier 2×120 W",
+       "mfr": "Example AV",
+       "model": "EX-AMP2",
+       "desc": "Two-channel amplifier, 4 Ω or 70/100 V",
+       "status": "verified",
+       "ports": [
+        {
+         "name": "Line In 1",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Line In 2",
+         "dir": "in",
+         "type": "audio"
+        },
+        {
+         "name": "Speaker Out 1",
+         "dir": "out",
+         "type": "spk"
+        },
+        {
+         "name": "Speaker Out 2",
+         "dir": "out",
+         "type": "spk"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "retired": [
+  "EX-OLD-1"
+ ]
+}

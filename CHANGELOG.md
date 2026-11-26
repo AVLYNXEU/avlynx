@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+**Documentation and tools**
+- Administrator guide for hosting AVLYNX in an organisation: server examples for nginx, Apache, IIS and Docker, access control, the company device library, updates and a roll-out checklist (`docs/ADMIN-GUIDE.md`, also as PDF).
+- `build/company-build.py` builds a company edition from a release file: edition name, company name, built-in library, accent colour and hidden parts.
+- `docs/example-library.json`: a small example library to start a company library from.
+
 ## 1.3.1 – 24 November 2026
 
 **Cable bundles**

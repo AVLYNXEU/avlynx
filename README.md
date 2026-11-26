@@ -28,13 +28,14 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 - Text boxes in three highly legible fonts, alignment guides, align and distribute
 - Several sheets per project, with cables that continue from one sheet to another; sheets can be duplicated
 - Select an area with Shift and drag; copy, cut and paste several devices, rooms and cables, also into another sheet or project
+- Cable bundles: many cables of one signal type share one run and split again just before the devices
 - Edit several lines or devices at once: shape, corners and arrows for all selected lines, location and notes for all selected devices
 - Edit menu on right-click or long press, with the actions for the object or the empty place
 - Replace a device while its cables stay connected
 - Details panel with the attributes of the selected device, cable or room
 
 **Documents**
-- PDF drawing with title block and legend in A1 to A4, Tabloid or Letter
+- PDF drawing with title block and legend in A1 to A4, Tabloid or Letter, landscape or portrait (also per sheet)
 - Excel workbook and CSV lists: equipment, cables and cable summary for ordering
 - Cable type, length and notes for many cables in one step
 - File names generated from project name, drawing number, revision and date
@@ -49,13 +50,21 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 
 ## Documentation
 
-The [user guide](docs/AVLYNX-User-Guide.pdf) describes every function, the import format for device lists and the provision of AVLYNX to a team.
+- The [user guide](docs/AVLYNX-User-Guide.pdf) describes every function and the import format for device lists.
+- The [administrator guide](docs/ADMIN-GUIDE.md) ([PDF](docs/AVLYNX-Administrator-Guide.pdf)) explains how to host AVLYNX on your own server, maintain a company device library and build a company edition.
+- Company builds and add-ons (build switches, the `window.AVLYNX` interface, the cable check hook) are described in [docs/EXTENSIONS.md](docs/EXTENSIONS.md).
 
-Company builds and add-ons (build switches, the `window.AVLYNX` interface, the cable check hook) are described in [docs/EXTENSIONS.md](docs/EXTENSIONS.md).
+## Hosting AVLYNX in your organisation
 
-## Shared library for a team
+AVLYNX runs from any static web server: copy `avlynx.html` from a release to a folder as `index.html`. To give the whole team the same device library, export it under **Manage library**, rename the file to `avlynx-library.json` and place it next to `index.html`. New users receive it immediately; all other users are offered an update when the file changes. Their own devices are kept. [`docs/example-library.json`](docs/example-library.json) is a small library to start from.
 
-Each user keeps a device library in the browser. To provide the same library to a team, export it under **Manage library**, rename the file to `avlynx-library.json` and place it next to `index.html` on the web server. New users receive it immediately; all other users are offered an update when the file changes. Their own devices are kept.
+For a company edition with your name, accent colour and library built in, run:
+
+```
+python3 build/company-build.py --edition "Example Ltd edition" --company "Example Ltd" --library avlynx-library.json --accent "#2b4c9a"
+```
+
+Server examples (nginx, Apache, IIS, Docker), access control, updates and a roll-out checklist are in the [administrator guide](docs/ADMIN-GUIDE.md).
 
 ## Browser support
 
