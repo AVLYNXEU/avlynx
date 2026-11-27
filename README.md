@@ -33,16 +33,19 @@ AVLYNX is a single HTML file. It requires no installation, no server and no acco
 - Edit menu on right-click or long press, with the actions for the object or the empty place
 - Replace a device while its cables stay connected
 - Details panel with the attributes of the selected device, cable or room
+- Find devices, cable IDs, rooms and texts on all sheets (Ctrl+F)
+- Check drawing: lists unconnected devices, devices without connectors and duplicate cable IDs, also before a PDF export
 
 **Documents**
 - PDF drawing with title block and legend in A1 to A4, Tabloid or Letter, landscape or portrait (also per sheet)
-- Excel workbook and CSV lists: equipment, cables and cable summary for ordering
+- Spreadsheet (.xlsx) and CSV lists: equipment, cables and cable summary for ordering, and cable labels for label printers
+- Images (PNG, SVG) of a sheet or of the selection, and a diagram file for draw.io
 - Cable type, length and notes for many cables in one step
 - File names generated from project name, drawing number, revision and date
 
 **Device library**
 - About 130 generic devices, including adapters and fiber extenders
-- Own groups, categories and devices; import and export as JSON, Excel or CSV
+- Own groups, categories and devices; import and export as JSON, spreadsheet (.xlsx) or CSV
 - Device editor with inputs and outputs side by side, sorted by drag and drop; connectors can be duplicated, copied and pasted into other devices
 - Favourites as references to library devices
 - Jump from a device on the drawing straight to its library entry and update it
@@ -75,7 +78,7 @@ Current versions of Chrome, Edge, Safari and Firefox on desktop computers, table
 - AVLYNX runs entirely in the browser. It has no server component, no account and no telemetry.
 - A content security policy in the file permits connections only to the server the file was loaded from.
 - Project and library files are validated when they are opened.
-- The only third-party code is jsPDF 4.2.1 for the PDF export. Excel and CSV files are written and read by AVLYNX itself.
+- The only third-party code is jsPDF 4.2.1 for the PDF export. Spreadsheet (.xlsx) and CSV files are written and read by AVLYNX itself.
 - Data in the browser is not encrypted. On shared computers, use separate browser profiles.
 
 Please report security issues as a private security advisory on GitHub, not as a public issue.
@@ -100,3 +103,7 @@ AVLYNX is released under the [MIT License](LICENSE).
 Copyright (c) 2026 Timo Schönmeier.
 
 The bundled library jsPDF and the fonts have their own licences; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+## Trademarks
+
+draw.io is a trademark of draw.io Ltd. Microsoft and Excel are trademarks of the Microsoft group of companies. HDMI, HDBaseT, Dante, DisplayPort, NDI, USB-C and other names of products, interfaces and file formats are trademarks of their owners. They are used only to describe compatibility; AVLYNX is not affiliated with or endorsed by these companies.

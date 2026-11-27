@@ -1,8 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 – 27 November 2026
 
-**Documentation and tools**
+**Find, check and new exports**
+- Find (button in the toolbar, or Ctrl+F): devices, models, cable IDs, cable types, rooms, texts and connector names on all sheets. AVLYNX switches to the sheet, centres the match and selects it; Enter and Shift+Enter step through the matches.
+- Check drawing (More ▾): lists devices that are not connected, devices without connectors, cable IDs used more than once and a missing project name; click an entry to show it. The check also opens before a PDF export when it finds something, and can be switched off there.
+- Export ▾ → Image (PNG) and Image (SVG): the current sheet, or only the area around the selection, always in light colours.
+- Export ▾ → Cable labels as CSV: one row per cable end with "To:" and "From:" texts, for label printer software.
+- Export ▾ → Diagram for draw.io (.drawio): one page per sheet with devices, connectors, cables on their routes, cable IDs, rooms and texts; cables stay attached to their connectors when devices are moved in draw.io.
+- The PDF writes Central and Eastern European letters (for example ł, č, ő, ș) with the embedded Atkinson Hyperlegible font when a project contains them.
+
+**Simpler to use**
+- The right-click menu of several selected objects offers Align left, Align top, Distribute evenly and More alignment….
+- Projects: the dialog shows the name of the current project, which can be changed there, and whether it has unsaved changes. Opening or starting a project asks only when there are unsaved changes. New project keeps the company details, logo, Drawn by, page and legend settings, from the welcome message and from the Projects dialog alike.
+- More ▾ → Open the example project opens the example as its own project instead of placing it on the current sheet.
+- The switch "Curved lines" for all lines was removed. Single lines can still be curved with Line ▾; curved lines in older projects stay curved.
+- The device list and the library manager open with all groups closed, and windows open again at the top with folded sections closed.
+- Menus name file types instead of other companies' programs ("spreadsheet (.xlsx)"); About AVLYNX and the guides contain a trademark notice.
+
+**Documentation and tools** (published earlier)
+
 - Administrator guide for hosting AVLYNX in an organisation: server examples for nginx, Apache, IIS and Docker, access control, the company device library, updates and a roll-out checklist (`docs/ADMIN-GUIDE.md`, also as PDF).
 - `build/company-build.py` builds a company edition from a release file: edition name, company name, built-in library, accent colour and hidden parts.
 - `docs/example-library.json`: a small example library to start a company library from.

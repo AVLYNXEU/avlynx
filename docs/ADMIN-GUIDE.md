@@ -2,7 +2,7 @@
 
 **Hosting AVLYNX in your organisation and maintaining your own device library**
 
-Version 1.3.1 · November 2026 · Also available as [PDF](AVLYNX-Administrator-Guide.pdf)
+Version 1.4 · November 2026 · Also available as [PDF](AVLYNX-Administrator-Guide.pdf)
 
 ---
 
@@ -24,6 +24,7 @@ Version 1.3.1 · November 2026 · Also available as [PDF](AVLYNX-Administrator-G
 14. [Roll-out checklist](#14-roll-out-checklist)
 - [Appendix A: File formats](#appendix-a-file-formats)
 - [Appendix B: Signal types](#appendix-b-signal-types)
+- [Trademarks](#trademarks)
 
 ---
 
@@ -44,7 +45,7 @@ For sections 5 and 6, no programming knowledge is needed. Section 7 uses a short
 
 ## 2 How AVLYNX works
 
-- **One file.** AVLYNX is a single HTML file. It contains the whole application: the PDF library jsPDF and the fonts for text boxes. Excel and CSV files are written and read by AVLYNX itself.
+- **One file.** AVLYNX is a single HTML file. It contains the whole application: the PDF library jsPDF and the fonts for text boxes. Spreadsheet (.xlsx) and CSV files are written and read by AVLYNX itself.
 - **No back end.** There is no database, no login and no server program. The web server only delivers static files.
 - **Data stays in the browser.** Drawings, saved projects and each user's device library are stored in the browser of that user, on that device.
 - **One optional library file.** If a file named `avlynx-library.json` is in the same folder as AVLYNX on the server, AVLYNX reads it. It offers this file as the company device library (section 6).
@@ -218,7 +219,7 @@ The public edition contains no company data and can be reachable by anyone. A co
 
 - The welcome message appears and shows the expected version.
 - With a library file, the device list contains your groups. In the developer tools of the browser (F12, **Network** tab), `avlynx-library.json` is loaded with status 200.
-- **Save as file**, the PDF export and the Excel export each start a download.
+- **Save as file**, the PDF export and the spreadsheet export each start a download.
 
 ---
 
@@ -277,11 +278,11 @@ Every export records the time it was made, as `stamp`. AVLYNX uses it to decide 
 
 **Do I need to keep the generic devices in the file?** No. The server file only needs your own groups. The generic devices are built into AVLYNX and are never changed by an update.
 
-### 6.4 Editing many devices in Excel
+### 6.4 Editing many devices in a spreadsheet
 
-1. In **Manage library**, choose **Export ▾**, then **Export as Excel**.
-2. Edit the list in Excel. Add rows for new devices.
-3. In AVLYNX, choose **Import** and select the Excel file.
+1. In **Manage library**, choose **Export ▾**, then **Export as spreadsheet (.xlsx)**.
+2. Edit the list in a spreadsheet program. Add rows for new devices.
+3. In AVLYNX, choose **Import** and select the .xlsx file.
 4. Check the result, then export as JSON (section 6.3) and replace the file on the server.
 
 | Column | Content |
@@ -427,7 +428,7 @@ For support: AVLYNX uses these browser storage keys:
 - **No data leaves the device.** AVLYNX does not transmit drawings, project details, logos or libraries. There is no telemetry and no account.
 - **Outside contact is blocked.** A Content Security Policy in the file allows connections only to the server the file came from. There, AVLYNX reads nothing but the optional library file.
 - **Imported files are checked.** Project and library files are validated when they are opened, and files larger than 20 MB are refused. Text from files is always shown as plain text. Colours and logos cannot load anything from other servers.
-- **Lists are safe to open.** In Excel files, text is stored as text. In CSV files, cells that a spreadsheet program would run as a formula are neutralised.
+- **Lists are safe to open.** In spreadsheet (.xlsx) files, text is stored as text. In CSV files, cells that a spreadsheet program would run as a formula are neutralised.
 - **No code is generated at run time.** AVLYNX does not turn text into program code.
 - **Fonts are built in.** No font is loaded from the internet.
 
@@ -496,7 +497,7 @@ AVLYNX is published under the MIT licence. You may host it, use it commercially,
 - [ ] `index.html` and `avlynx-library.json` are in the same folder.
 - [ ] A first start in a fresh browser shows your device groups.
 - [ ] AVLYNX was tried on every kind of device in use, including Safari on an iPad if you use iPads.
-- [ ] PDF, Excel and project file were exported once on each kind of device.
+- [ ] PDF, spreadsheet and project file were exported once on each kind of device.
 - [ ] The library maintainer and the place for library backups are named.
 - [ ] Users know: save projects as files, and keep their own devices in a group of their own.
 - [ ] A copy of the delivered files, their checksums and, for set-up B, the build command are stored.
@@ -593,3 +594,9 @@ Each connector takes one cable, with these exceptions:
 
 - Analog audio connectors take up to two.
 - Speaker connectors take any number, including speaker-to-speaker chains for 70/100 V systems.
+
+---
+
+## Trademarks
+
+draw.io is a trademark of draw.io Ltd. Microsoft and Excel are trademarks of the Microsoft group of companies. HDMI is a trademark of HDMI Licensing Administrator, Inc. HDBaseT is a trademark of the HDBaseT Alliance. Dante is a trademark of Audinate Pty Ltd. DisplayPort is a trademark of VESA. NDI is a trademark of Vizrt NDI AB. USB-C is a trademark of USB Implementers Forum. Other names of products, interfaces and file formats are trademarks of their owners. They are used only to describe compatibility; AVLYNX is not affiliated with or endorsed by these companies.

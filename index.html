@@ -6,7 +6,7 @@
   Version 1.2
   Licensed under the MIT License. See the LICENSE file.
 
-  Third-party library used for the PDF export: jsPDF 4.2.1 (MIT licence). Excel and CSV files are written and read by AVLYNX itself.
+  Third-party library used for the PDF export: jsPDF 4.2.1 (MIT licence). Spreadsheet (.xlsx) and CSV files are written and read by AVLYNX itself.
   Embedded fonts for text boxes: Atkinson Hyperlegible and Atkinson Hyperlegible Mono (SIL Open Font License 1.1).
 -->
 <html lang="en">
@@ -216,6 +216,16 @@ main{flex:1; min-height:0; display:flex; position:relative}
 #hist .btn[aria-pressed="true"]{background:color-mix(in srgb,var(--sel) 16%,transparent); border-color:var(--sel); color:var(--ink)}
 #hist #lockDraw{padding:5px 9px; display:flex; align-items:center; justify-content:center}
 .tsep{width:1px; align-self:stretch; background:var(--line); margin:3px 4px}
+#findBar{position:absolute; top:56px; left:12px; display:flex; align-items:center; gap:2px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:4px; box-shadow:0 4px 16px rgba(10,16,24,.12); z-index:6; max-width:calc(100% - 24px)}
+#findBar[hidden]{display:none}
+#findIn{width:min(280px,46vw); font:inherit; font-size:15px; padding:6px 9px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink)}
+#findCount{min-width:74px; text-align:center; font-size:13px; color:var(--muted); white-space:nowrap}
+#findBar .btn{background:transparent; border-color:transparent; min-height:32px; padding:2px 8px; font-size:16px}
+#findBar .btn:hover:not(:disabled){background:var(--paper); border-color:var(--line)}
+.chklist{list-style:none; margin:0; padding:0; max-height:min(50vh,380px); overflow:auto; display:flex; flex-direction:column; gap:4px}
+.chklist button{width:100%; text-align:left; font:inherit; font-size:14.5px; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); cursor:pointer}
+.chklist button:hover{border-color:var(--sel)}
+.chklist .warn{color:var(--danger); font-weight:700; margin-right:6px}
 #zoombar{position:absolute; right:12px; bottom:14px; display:flex; gap:2px}
 #info{position:absolute; right:12px; bottom:66px; display:none; width:264px; background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--brand); border-radius:8px; padding:8px 12px 10px; font-size:13px; line-height:1.4; color:var(--ink); box-shadow:0 1px 3px rgba(10,16,24,.08); pointer-events:none}
 #info.on{display:block}
@@ -259,6 +269,7 @@ kbd{font:inherit; font-size:12px; border:1px solid var(--line); border-bottom-wi
 #lockBtn{display:flex; align-items:center; gap:6px}
 #lockBtn svg{width:16px; height:16px}
 .mgrbar{display:flex; gap:6px; flex-wrap:wrap}
+.pjcur{display:flex; flex-direction:column; gap:4px} .pjcur input{font:inherit; font-size:16px; font-weight:600; padding:7px 10px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink)} #pjState{font-size:13px; color:var(--muted)} #pMsg:empty{display:none}
 #mgrMsg{min-height:0; color:var(--muted)}
 #mgrMsg.bad{color:var(--danger)}
 #mgrList{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; border-top:1px solid var(--line)}
@@ -347,22 +358,28 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
   <span class="brand"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M4 3l9 7 3-1 3 1 9-7-1.5 12L25 23l-9 7-9-7-1.5-8z"/><path d="M11.5 16.5L16 23l4.5-6.5" fill="none" stroke="var(--panel)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="16.5" r="2.3" fill="#3b7cf0"/><circle cx="20.5" cy="16.5" r="2.3" fill="#e5484d"/></svg><h1>AVLYNX</h1></span>
   <span class="sp"></span>
   <button class="btn" id="fileBtn" title="Save, open or start a project (Ctrl+S saves)">Projects</button>
-  <button class="btn primary" id="expBtn" aria-haspopup="true" aria-expanded="false" title="PDF drawing, Excel and CSV lists">Export ▾</button>
+  <button class="btn primary" id="expBtn" aria-haspopup="true" aria-expanded="false" title="PDF drawing, images, lists and diagram files">Export ▾</button>
   <button class="btn" id="moreBtn" aria-haspopup="true" aria-expanded="false" aria-label="More actions">More ▾</button>
   <div class="menu" id="expMenu">
     <button id="xPdf">Drawing as PDF<small>With title block and legend</small></button>
-    <button id="xXlsx">Lists as Excel workbook<small>Equipment, summary, cables and cable summary</small></button>
+    <button id="xPng">Image (PNG)<small>This sheet, or the selected area. For mail, chat and slides</small></button>
+    <button id="xSvg">Image (SVG)<small>Sharp at any size, editable in drawing programs</small></button>
+    <hr>
+    <button id="xXlsx">Lists as spreadsheet (.xlsx)<small>Equipment, summary, cables and cable summary</small></button>
     <button id="xCsvEq">Equipment list as CSV</button>
     <button id="xCsvCb">Cable list as CSV</button>
     <button id="xCsvCs">Cable summary as CSV<small>Quantity per cable type and length</small></button>
+    <button id="xCsvLb">Cable labels as CSV<small>One row per cable end, for label printers</small></button>
+    <hr>
+    <button id="xDrawio">Diagram for draw.io (.drawio)<small>Devices, connectors and cables to edit further</small></button>
   </div>
   <div class="menu hasck" id="moreMenu">
     <button id="mFile" class="narrow-only">Projects</button>
     <button id="mProj">Title block and legend</button>
-    <button id="routeAll" role="menuitemcheckbox">Curved lines</button>
+    <button id="chkBtn">Check drawing<small>Lists what looks unfinished</small></button>
     <button id="infoBtn" class="wide-only" role="menuitemcheckbox">Details panel</button>
     <hr>
-    <button id="exBtn">Load example drawing</button>
+    <button id="exBtn">Open the example project</button>
     <button id="keysBtn">Keyboard shortcuts</button>
     <button id="aboutBtn">About AVLYNX</button>
     <hr>
@@ -384,7 +401,8 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       <rect width="100%" height="100%" fill="url(#grid)"/>
       <g id="world"><g id="zones"></g><g id="edges"></g><g id="nodes"></g><g id="texts"></g><g id="tags"></g><g id="temp"></g></g>
     </svg>
-    <div id="hist" role="toolbar" aria-label="Drawing tools"><button class="btn ic" id="undoBtn" aria-label="Undo" title="Undo (Ctrl+Z)" disabled>↶</button><button class="btn ic" id="redoBtn" aria-label="Redo" title="Redo (Ctrl+Y)" disabled>↷</button><span class="tsep"></span><button class="btn" id="zoneBtn" aria-pressed="false" title="Drag across the drawing to frame a room">+ Room</button><button class="btn" id="textBtn" title="Add a text box">+ Text</button><span class="tsep"></span><button class="btn tog" id="guideBtn" aria-pressed="true" title="Alignment guides while moving objects">Guides</button><button class="btn ic" id="lockDraw" aria-pressed="false"></button></div>
+    <div id="hist" role="toolbar" aria-label="Drawing tools"><button class="btn ic" id="undoBtn" aria-label="Undo" title="Undo (Ctrl+Z)" disabled>↶</button><button class="btn ic" id="redoBtn" aria-label="Redo" title="Redo (Ctrl+Y)" disabled>↷</button><span class="tsep"></span><button class="btn" id="zoneBtn" aria-pressed="false" title="Drag across the drawing to frame a room">+ Room</button><button class="btn" id="textBtn" title="Add a text box">+ Text</button><button class="btn" id="findBtn" title="Find a device, cable ID, room or text (Ctrl+F)">Find</button><span class="tsep"></span><button class="btn tog" id="guideBtn" aria-pressed="true" title="Alignment guides while moving objects">Guides</button><button class="btn ic" id="lockDraw" aria-pressed="false"></button></div>
+    <div id="findBar" role="search" hidden><input id="findIn" type="text" enterkeyhint="search" placeholder="Device, cable ID, room or text" aria-label="Find in the drawing" autocomplete="off" maxlength="80"><span id="findCount" aria-live="polite"></span><button class="btn ic" id="findPrev" aria-label="Previous match" title="Previous match (Shift+Enter)">↑</button><button class="btn ic" id="findNext" aria-label="Next match" title="Next match (Enter)">↓</button><button class="btn ic" id="findClose" aria-label="Close the search" title="Close (Esc)">×</button></div>
     <div id="info" role="status" aria-label="Details of the selected object"></div>
     <div id="zoombar" role="toolbar" aria-label="Zoom"><button class="btn ic" id="zoomOut" aria-label="Zoom out" title="Zoom out (−)">−</button><button class="btn" id="zoomPct" title="Zoom to 100 %">100 %</button><button class="btn ic" id="zoomIn" aria-label="Zoom in" title="Zoom in (+)">+</button><button class="btn" id="fitBtn" title="Show the whole drawing (F)">Fit</button></div>
     <div id="empty" hidden><b>Start your drawing</b><span id="emptyHint">Click a device in the library on the left, or drag it onto the drawing. Then connect two connectors by dragging from one to the other.</span><div><button class="btn primary" id="emptyLib">Add device</button><button class="btn" id="emptyEx">Show the example</button></div></div>
@@ -438,7 +456,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <div class="mgrbar">
       <button class="btn primary" id="mgUpdate" hidden>Apply library update</button>
       <button class="btn edit-only" id="mgAddGroup">+ Group</button>
-      <button class="btn edit-only" id="mgImport" title="JSON, Excel or CSV">Import</button>
+      <button class="btn edit-only" id="mgImport" title="JSON, spreadsheet (.xlsx) or CSV">Import</button>
       <button class="btn" id="mgExport" aria-haspopup="true">Export ▾</button>
       <button class="btn" id="mgMore" aria-haspopup="true" aria-label="More library actions" title="More library actions">⋯</button>
       <span hidden><button id="mgUndoUpd"></button><button id="mgCollapse"></button><button id="mgExpJson"></button><button id="mgExpXlsx"></button><button id="mgReset"></button></span>
@@ -505,18 +523,22 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
 <dialog id="projects">
   <div class="dlg">
     <h2>Projects</h2>
-    <p style="margin:0">Current project: <b id="pjCur"></b></p>
+    <h3 style="margin:0">Current project</h3>
+    <div class="pjcur"><input type="text" id="pjName" maxlength="200" placeholder="Untitled project" aria-label="Project name"><span id="pjState"></span></div>
     <div class="mgrbar">
       <button class="btn primary" id="pSave">Save in this browser</button>
       <button class="btn" id="pFile">Save as file</button>
-      <button class="btn" id="pOpen">Open file</button>
+    </div>
+    <h3 style="margin:6px 0 0">Open or start a project</h3>
+    <div class="mgrbar">
+      <button class="btn" id="pOpen">Open file…</button>
       <button class="btn" id="pNew">New project</button>
       <input type="file" id="pInput" accept=".json,application/json" hidden>
     </div>
     <p class="err" id="pMsg" style="color:var(--muted)"></p>
-    <h3>Saved in this browser</h3>
+    <h3 style="margin:6px 0 0">Saved in this browser</h3>
     <div id="pList"></div>
-    <p style="margin:0; font-size:13px; color:var(--muted)">Opening a project replaces the current drawing. The project name is set in the title block: click the legend.</p>
+    <p style="margin:0; font-size:13px; color:var(--muted)">AVLYNX keeps the current drawing in this browser automatically. Save it here or as a file to keep it as a project you can come back to.</p>
     <div class="foot"><button class="btn" id="pClose">Close</button></div>
   </div>
 </dialog>
@@ -541,6 +563,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
       <tr><td><kbd>Ctrl</kbd> + <kbd>A</kbd></td><td>Select everything on this sheet</td></tr>
       <tr><td><kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd></td><td>Copy, cut, paste the selection, also into another sheet or project</td></tr>
       <tr><td><kbd>Ctrl</kbd> + <kbd>D</kbd></td><td>Duplicate the selection</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + <kbd>F</kbd></td><td>Find a device, cable ID, room or text on all sheets</td></tr>
       <tr><td><kbd>Shift</kbd> + click</td><td>Add an object to the selection, or remove it</td></tr>
       <tr><td><kbd>Shift</kbd> + drag</td><td>Select everything inside a frame; a frame across lines only selects those lines. With <kbd>Ctrl</kbd> as well, add to the selection</td></tr>
       <tr><td>Right-click, long press</td><td>Menu with the actions for the object, or for an empty place</td></tr>
@@ -554,6 +577,16 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     </table>
     <p class="hint">On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>. Hold <kbd>Alt</kbd> while moving to switch the alignment guides off for that move.</p>
     <div class="foot"><button class="btn" id="keysClose">Close</button></div>
+  </div>
+</dialog>
+
+<dialog id="chk" aria-labelledby="chkTitle">
+  <div class="dlg">
+    <h2 id="chkTitle">Check drawing</h2>
+    <p id="chkSum" style="margin:0"></p>
+    <ul id="chkList" class="chklist"></ul>
+    <label class="check" id="chkAutoL"><input type="checkbox" id="chkAuto"> Check before every PDF export</label>
+    <div class="foot"><button class="btn" id="chkClose">Close</button><button class="btn primary" id="chkPdf" hidden>Export PDF anyway</button></div>
   </div>
 </dialog>
 
@@ -573,6 +606,7 @@ body.pdrag,body.pdrag *{cursor:grabbing!important}
     <p style="margin:0">AV system diagram editor. Draw signal flows, export drawings and equipment lists.</p>
     <p style="margin:0">Created by <b id="abAuthor"></b></p>
     <p style="margin:0; color:var(--muted); font-size:13px" id="abVersion"></p>
+    <p style="margin:0; color:var(--muted); font-size:12px">Names of products, interfaces and file formats are trademarks of their owners and are used only to describe compatibility. AVLYNX is not affiliated with or endorsed by them.</p>
     <div class="foot" style="align-self:stretch"><button class="btn" id="abClose">Close</button></div>
   </div>
 </dialog>
@@ -960,7 +994,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 'use strict';
 if(!window.HTMLDialogElement||!window.PointerEvent){ document.body.style.padding='24px'; document.body.textContent='AVLYNX needs a current browser: Chrome, Edge or Firefox, or Safari 15.4 or newer.'; return; }
 // AVLYNX – created by Timo Schönmeier. Copyright (c) 2026 Timo Schönmeier.
-const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.3.1',year:2026});
+const APP=Object.freeze({name:'AVLYNX',author:'Timo Schönmeier',version:'1.4',year:2026});
 // Settings an organisation can set when it builds its own edition of this file.
 const EDITION=/*@EDITION@*/'';      // shown next to the version, for example "Example Ltd edition"
 const COMPANY=/*@COMPANY@*/'';      // company name pre-filled in new projects
@@ -1198,6 +1232,7 @@ function load(){ try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s&&Array
   return s; } }catch(e){} return null; }
 function el(tag,attrs,kids){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); (kids||[]).forEach(c=>e.appendChild(c)); return e; }
 function h(tag,props,kids){ const e=document.createElement(tag); Object.assign(e,props||{}); (kids||[]).forEach(c=>e.append(c)); return e; }
+let EXPORTING=false; // while true, a redraw contains the whole sheet at full detail (image export)
 let RC=null; // lookup tables that live for one redraw or one export, so large plans stay fast
 const nodeById=id=>RC?RC.nm.get(id):state.nodes.find(n=>n.id===id);
 const zoneById=id=>(state.zones||[]).find(z=>z.id===id);
@@ -1590,7 +1625,7 @@ function renderNow(){
   if(multi.length<2||!(sel&&multi.some(r=>r.kind===sel.kind&&r.id===sel.id))) multi=[];
   const tf='translate('+view.x+' '+view.y+') scale('+view.k+')';
   // large plans: draw only what is on screen, and leave out fine detail when zoomed far out
-  const vr=svg.getBoundingClientRect(), cull=vr.width>0, vm=140, vx0=-view.x/view.k-vm, vy0=-view.y/view.k-vm, vx1=(vr.width-view.x)/view.k+vm, vy1=(vr.height-view.y)/view.k+vm, lod=view.k<0.3;
+  const vr=svg.getBoundingClientRect(), cull=vr.width>0&&!EXPORTING, vm=140, vx0=-view.x/view.k-vm, vy0=-view.y/view.k-vm, vx1=(vr.width-view.x)/view.k+vm, vy1=(vr.height-view.y)/view.k+vm, lod=view.k<0.3&&!EXPORTING;
   world.setAttribute('transform',tf); grid.setAttribute('patternTransform',tf);
   const G={}; state.nodes.forEach(n=>G[n.id]=geo(n));
   edgesG.replaceChildren(); nodesG.replaceChildren(); tempG.replaceChildren(); $('tags').replaceChildren(); $('texts').replaceChildren();
@@ -1678,7 +1713,7 @@ function renderNow(){
   if(selZ&&!state.locked){ tempG.appendChild(el('circle',{class:'hdl',cx:selZ.x+selZ.w,cy:selZ.y+selZ.h,r:6.5})); tempG.appendChild(el('circle',{class:'hdlhit',cx:selZ.x+selZ.w,cy:selZ.y+selZ.h,r:17,'data-zhandle':selZ.id})); }
   if(g&&g.kind==='marquee'&&g.moved) tempG.appendChild(el('rect',{class:'mrect',x:Math.min(g.w0.x,g.w.x),y:Math.min(g.w0.y,g.w.y),width:Math.abs(g.w.x-g.w0.x),height:Math.abs(g.w.y-g.w0.y)}));
   if(g&&g.kind==='zdraw'&&g.moved) tempG.appendChild(el('rect',{class:'zrect',x:Math.min(g.w0.x,g.w.x),y:Math.min(g.w0.y,g.w.y),width:Math.abs(g.w.x-g.w0.x),height:Math.abs(g.w.y-g.w0.y),rx:10}));
-  ckItem($('routeAll'),'Curved lines',state.doc.route!=='ortho'); ckItem($('infoBtn'),'Details panel',state.info!==false); renderInfo();
+  ckItem($('infoBtn'),'Details panel',state.info!==false); renderInfo();
   const bar=$('selbar');
   const nEdges=many?multi.filter(r=>r.kind==='edge').length:0;
   $('multiColBtn').style.display=many&&multi.some(r=>r.kind!=='edge')?'':'none'; $('alignBtn').style.display=many&&multi.filter(r=>r.kind==='node'||r.kind==='text').length>1?'':'none'; $('editBtn').style.display=many?'none':''; $('refBtn').style.display='none'; $('cornerBtn').style.display='none'; $('resetLineBtn').style.display='none'; $('goSheetBtn').style.display='none'; $('repBtn').style.display=!many&&sel&&sel.kind==='node'?'':'none';
@@ -1695,7 +1730,7 @@ function renderNow(){
   let st='';
   if(drawZone) st='Drag across the drawing to frame a room';
   else if(many&&nEdges>1&&nEdges===multi.length) st='“Edit '+nEdges+' cables” sets type, length and notes; Line ▾ shapes or bundles them; a round handle moves the same part of every line';
-  else if(many) st='Drag one of them to move them all. '+MOD+'C copies, '+MOD+'V pastes, right-click for more';
+  else if(many) st='Drag one of them to move them all. Right-click to align them; '+MOD+'C copies, '+MOD+'V pastes';
   else if(sel&&sel.kind==='text'&&!state.locked) st='Drag to move the text. Double-click or tap “Edit” to change it';
   else if(state.locked&&sel) st='The drawing is locked. Unlock it to move objects';
   else if(selZ) st='Drag the frame to move the room with its devices. Drag the round handle to resize';
@@ -1952,6 +1987,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){ drawZone=false; pending=null; sel=null; multi=[]; endReplace(); closeMenus(); closeCtx(); render(); }
   if(zk==='s'){ e.preventDefault(); const en=saveInBrowser(); if(en) toast('Saved “'+en.name+'” in this browser'); }
   if(zk==='d'){ e.preventDefault(); if(sel) dupSel(); }
+  if(zk==='f'){ e.preventDefault(); openFind(); return; }
   if(!e.ctrlKey&&!e.metaKey&&!e.altKey){
     if(e.key==='+'||e.key==='=') zoomStep(1); else if(e.key==='-'||e.key==='_') zoomStep(-1); else if(e.key==='f'||e.key==='F') fit();
   }
@@ -1986,7 +2022,7 @@ document.addEventListener('pointerdown',e=>{ if(!e.target.closest('.menu')&&!Obj
 $('expBtn').addEventListener('click',()=>toggleMenu('expMenu'));
 $('moreBtn').addEventListener('click',()=>toggleMenu('moreMenu'));
 function summary(d){ const i=d.ports.filter(p=>p.dir==='in').length, o=d.ports.length-i; return [d.desc||(d.model&&d.model!==d.name?d.model:''),i+' in, '+o+' out'].filter(Boolean).join(' · '); }
-const openBrands=new Set(['\u0001fav']), openCats=new Set();
+const openBrands=new Set(), openCats=new Set();
 // Favourites point to a device in the library (group and model or name); they are not copies
 const favKey=d=>d.model||d.name;
 const isFav=(g1,d)=>(state.favs||[]).some(f=>f.k===favKey(d)); // the group is a hint: a device moved by a library update stays a favourite
@@ -2079,7 +2115,7 @@ document.addEventListener('pointerup',e=>{
   if(over&&over.closest('#stage')&&!over.closest('#hist,#zoombar,#selbar,.menu,#legend')&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom) addDevice(dr.d,toWorld(e));
 });
 document.addEventListener('pointercancel',()=>{ if(libDrag&&libDrag.ghost) libDrag.ghost.remove(); libDrag=null; });
-$('fab').addEventListener('click',()=>$('lib').classList.add('open'));
+$('fab').addEventListener('click',()=>{ openBrands.clear(); openCats.clear(); renderLib(); $('lib').classList.add('open'); });
 $('libClose').addEventListener('click',()=>{ $('lib').classList.remove('open'); if(replacing){ endReplace(); render(); } });
 $('fitBtn').addEventListener('click',()=>{ closeMenus(); fit(); });
 function zoomTo(k){ const r=svg.getBoundingClientRect(), mx=r.width/2, my=r.height/2; k=Math.max(.05,Math.min(2.5,k)); view={k,x:mx-(mx-view.x)/view.k*k,y:my-(my-view.y)/view.k*k}; render(); }
@@ -2090,7 +2126,8 @@ $('mFile').addEventListener('click',()=>$('fileBtn').click()); $('mProj').addEve
 $('keysBtn').addEventListener('click',()=>{ closeMenus(); $('keys').showModal(); }); $('keysClose').addEventListener('click',()=>$('keys').close());
 $('emptyLib').addEventListener('click',()=>{ if(window.matchMedia('(max-width:800px)').matches) $('lib').classList.add('open'); else { const s1=$('libSearch'); s1.focus(); s1.select(); } });
 $('emptyEx').addEventListener('click',()=>{ const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; state.texts=[]; sel=null; multi=[]; pending=null; save(); fit(); });
-$('exBtn').addEventListener('click',()=>{ closeMenus(); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; state.texts=[]; sel=null; pending=null; save(); fit(); });
+function openExample(){ blankProject(keepForNew()); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; sel=null; persist(); resetHistory(); fit(); markSaved(); }
+setTimeout(()=>guard($('exBtn'),'Open the example project',()=>{ closeMenus(); openExample(); }),0);
 let clearArmed=0;
 $('clearBtn').addEventListener('click',()=>{
   const b=$('clearBtn');
@@ -2242,11 +2279,6 @@ function renderInfo(){
   box.replaceChildren(h('h3',{textContent:d.title}),h('dl',{},rows.flatMap(r=>[h('dt',{textContent:r[0]}),h('dd',{textContent:String(r[1])})])));
   box.style.borderLeftColor=d.color||''; box.classList.add('on');
 }
-$('routeAll').addEventListener('click',()=>{
-  state.doc.route=state.doc.route==='ortho'?'curve':'ortho';
-  state.edges.forEach(e=>{ delete e.route; delete e.bend; delete e.segs; });
-  closeMenus(); save(); render();
-});
 $('dupBtn').addEventListener('click',()=>dupSel());
 
 // Copy, cut, paste and duplicate. A room brings its devices and texts; cables come along when both of their
@@ -2348,6 +2380,9 @@ function openCtx(x,y,hitEl){
     if(node&&loc) it('Edit in the device library','',()=>editInLibrary(node,loc));
     if(node){ const bi=nodeBundleItems(node); if(bi.length){ items.push(null); bi.forEach(o=>items.push(o)); } }
     if(!one&&refs.filter(r=>r.kind==='node').length>1) it('Edit '+refs.filter(r=>r.kind==='node').length+' devices','',()=>$('devsBtn').click());
+    { const al=refs.filter(r=>r.kind==='node'||r.kind==='text'); if(!one&&al.length>1&&!state.locked){ items.push(null); it('Align left','',()=>alignNodes('left')); it('Align top','',()=>alignNodes('top'));
+      if(al.length>2) it('Distribute evenly','',()=>{ const rs=al.map(r=>rectOf(r.kind,r.kind==='node'?nodeById(r.id):textById(r.id))), w=Math.max(...rs.map(q=>q.x+q.w))-Math.min(...rs.map(q=>q.x)), hh=Math.max(...rs.map(q=>q.y+q.h))-Math.min(...rs.map(q=>q.y)); alignNodes(w>=hh?'hdist':'vdist'); });
+      it('More alignment…','',()=>toggleMenu('alignMenu')); } }
     if(!one&&refs.some(r=>r.kind==='edge')){ it($('cablesBtn').textContent,'',()=>$('cablesBtn').click()); const li=lineItemsMulti(selEdges()); if(li.length){ items.push(null); li.forEach(o=>items.push(o)); } }
     if(objs) copyOps();
     items.push(null); it('Delete','Del',removeSel,true,{danger:true});
@@ -2372,7 +2407,7 @@ function libLocate(n){
 function editInLibrary(n,loc){
   if(!loc||!FEATURES.libraryManager) return;
   if($('props').open) $('props').close(); closeCtx(); $('lib').classList.remove('open');
-  state.libLocked=false; save(); mgrOpenSet.add(loc.g1); mgrClosedCats.delete(loc.c);
+  state.libLocked=false; save(); mgrFold(); mgrOpenSet.add(loc.g1); mgrClosedCats.delete(loc.c);
   mgrMsg('Unlocked for this change. The library locks again when you close it.'); $('mgr').showModal(); renderMgr();
   openEditor(loc.g1,loc.c,loc.d); edCtx.node=n.id;
 }
@@ -2681,6 +2716,7 @@ $('customBtn').addEventListener('click',openCustomDevice);
 $('editor').addEventListener('close',()=>{ $('edSave').textContent='Save device'; });
 // library manager
 const mgrOpenSet=new Set(), mgrClosedCats=new Set(); let drag=null;
+function mgrFold(){ mgrOpenSet.clear(); mgrClosedCats.clear(); state.lib.forEach(g1=>g1.cats.forEach(c=>mgrClosedCats.add(c))); }
 const LOCK_ICON=open=>{ const s1=document.createElementNS(NS,'svg'); s1.setAttribute('viewBox','0 0 16 16'); s1.setAttribute('aria-hidden','true'); s1.appendChild(el('rect',{x:3,y:7,width:10,height:7,rx:1.5,fill:'currentColor'})); s1.appendChild(el('path',{d:open?'M5 7V4.5a3 3 0 0 1 5.8-1':'M5 7V4.5a3 3 0 0 1 6 0V7',fill:'none',stroke:'currentColor','stroke-width':1.6,'stroke-linecap':'round'})); return s1; };
 function mgrMsg(t,bad){ const m=$('mgrMsg'); m.textContent=t||''; m.classList.toggle('bad',!!bad); }
 function armed(btn,label,fn){ btn.addEventListener('click',()=>{ if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; fn(); return; } btn.dataset.armed='1'; btn.textContent='Sure?'; setTimeout(()=>{ if(btn.isConnected&&btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; } },3000); }); }
@@ -2775,7 +2811,7 @@ function dragEnd(e){
 }
 $('mgrList').addEventListener('pointerup',dragEnd);
 $('mgrList').addEventListener('pointercancel',dragEnd);
-$('mgrBtn').addEventListener('click',()=>{ if(!FEATURES.libraryManager) return; $('lib').classList.remove('open'); mgrMsg(state.libLocked?'The library is locked. Use the lock to edit it.':''); $('mgr').showModal(); renderMgr(); });
+$('mgrBtn').addEventListener('click',()=>{ if(!FEATURES.libraryManager) return; $('lib').classList.remove('open'); mgrFold(); mgrMsg(state.libLocked?'The library is locked. Use the lock to edit it.':''); $('mgr').showModal(); renderMgr(); });
 $('mgrClose').addEventListener('click',()=>$('mgr').close());
 $('mgr').addEventListener('close',()=>{ if(!state.libLocked){ state.libLocked=true; save(); } }); // also on Esc
 $('mgCollapse').addEventListener('click',()=>{ const all=state.lib.flatMap(g1=>g1.cats), anyOpen=all.some(c=>!mgrClosedCats.has(c)); mgrClosedCats.clear(); if(anyOpen) all.forEach(c=>mgrClosedCats.add(c)); state.lib.forEach(g1=>mgrOpenSet.add(g1)); renderMgr(); });
@@ -2805,7 +2841,7 @@ function rowToDev(row,i){
   return {group:get('group','brand'),category:get('category'),name,mfr:get('manufacturer','mfr'),model,desc:get('description'),status:get('status'),loop:get('loop'),ports:[...parsePorts(get('inputs'),'in',where),...parsePorts(get('outputs'),'out',where)]};
 }
 $('mgImport').addEventListener('click',()=>$('mgrFile').click());
-$('mgExport').addEventListener('click',ev=>popMenu(0,0,[{label:'Export as JSON',fn:()=>$('mgExpJson').click()},{label:'Export as Excel',fn:()=>$('mgExpXlsx').click()}],ev.currentTarget));
+$('mgExport').addEventListener('click',ev=>popMenu(0,0,[{label:'Export as JSON',fn:()=>$('mgExpJson').click()},{label:'Export as spreadsheet (.xlsx)',fn:()=>$('mgExpXlsx').click()}],ev.currentTarget));
 $('mgMore').addEventListener('click',ev=>{ const open=state.lib.flatMap(g1=>g1.cats).some(c=>!mgrClosedCats.has(c));
   popMenu(0,0,[{label:open?'Collapse all categories':'Expand all categories',fn:()=>$('mgCollapse').click()},
     readBackup()?{label:'Undo library update',confirm:'Undo the update? '+TAP+' again',fn:()=>$('mgUndoUpd').click()}:null,
@@ -2823,7 +2859,7 @@ $('mgrFile').addEventListener('change',async()=>{
     }
     else if(/\.xlsx$/i.test(f.name)) list=rowsToObjects(await xlsxRows(buf)).map(rowToDev).filter(Boolean);
     else if(/\.csv$/i.test(f.name)) list=rowsToObjects(csvRows(new TextDecoder().decode(buf))).map(rowToDev).filter(Boolean);
-    else throw new Error('Choose a JSON, Excel (.xlsx) or CSV file.');
+    else throw new Error('Choose a JSON, spreadsheet (.xlsx) or CSV file.');
     if(!list.length) throw new Error('The file contains no devices.');
     const r=importDevices(list); libChanged(); mgrMsg('Imported from '+f.name+': '+r.added+' new, '+r.updated+' updated.');
   }catch(x){ mgrMsg(x instanceof SyntaxError?'This file cannot be read as JSON.':(x&&x.message)||'The file could not be read.',true); }
@@ -2865,7 +2901,7 @@ function xlsxBuild(sheets,props){ // sheets: [{name,rows,widths}]; text cells ar
   ]);
 }
 async function unzipXml(buf){ // name -> bytes, for the XML parts of an Excel file
-  const b=new Uint8Array(buf), dv=new DataView(buf), bad=()=>new Error('This is not a readable Excel file.'); let e=b.length-22;
+  const b=new Uint8Array(buf), dv=new DataView(buf), bad=()=>new Error('This is not a readable spreadsheet (.xlsx) file.'); let e=b.length-22;
   while(e>=0&&dv.getUint32(e,true)!==0x06054b50) e--; if(e<0) throw bad();
   const n=dv.getUint16(e+10,true), out=new Map(), dec=new TextDecoder(); let p=dv.getUint32(e+16,true);
   for(let i=0;i<n&&i<2000;i++){
@@ -2875,7 +2911,7 @@ async function unzipXml(buf){ // name -> bytes, for the XML parts of an Excel fi
     const ds=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true), raw=b.subarray(ds,ds+csize);
     if(method===0) out.set(name,raw);
     else if(method===8){
-      if(!window.DecompressionStream) throw new Error('This browser cannot open Excel files. Save the list as CSV and import that file.');
+      if(!window.DecompressionStream) throw new Error('This browser cannot open .xlsx files. Save the list as CSV and import that file.');
       out.set(name,new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()));
     }
   }
@@ -2883,12 +2919,12 @@ async function unzipXml(buf){ // name -> bytes, for the XML parts of an Excel fi
 }
 async function xlsxRows(buf){ // the first worksheet as rows of text
   const parts=await unzipXml(buf), dec=new TextDecoder(), tags=(el,name)=>[...el.getElementsByTagNameNS('*',name)];
-  const xml=name=>{ const d=parts.get(name); if(!d) return null; const doc=new DOMParser().parseFromString(dec.decode(d),'application/xml'); if(doc.getElementsByTagName('parsererror').length) throw new Error('This Excel file cannot be read.'); return doc; };
+  const xml=name=>{ const d=parts.get(name); if(!d) return null; const doc=new DOMParser().parseFromString(dec.decode(d),'application/xml'); if(doc.getElementsByTagName('parsererror').length) throw new Error('This spreadsheet cannot be read.'); return doc; };
   const texts=el=>tags(el,'t').filter(t=>!t.parentNode||t.parentNode.localName!=='rPh').map(t=>t.textContent).join('');
   const sst=xml('xl/sharedStrings.xml'), shared=sst?tags(sst,'si').map(texts):[];
   let path='xl/worksheets/sheet1.xml'; const wb=xml('xl/workbook.xml'), rels=xml('xl/_rels/workbook.xml.rels');
   if(wb&&rels){ const sh=tags(wb,'sheet')[0], rid=sh&&(sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')), rel=rid&&tags(rels,'Relationship').find(r=>r.getAttribute('Id')===rid), t=rel&&rel.getAttribute('Target'); if(t) path=t.charAt(0)==='/'?t.slice(1):'xl/'+t; }
-  const ws=xml(path); if(!ws) throw new Error('This Excel file contains no worksheet.');
+  const ws=xml(path); if(!ws) throw new Error('This spreadsheet contains no worksheet.');
   return tags(ws,'row').slice(0,20000).map(row=>{
     const out=[]; let next=0;
     tags(row,'c').forEach(c=>{
@@ -2917,6 +2953,176 @@ function rowsToObjects(rows){ // first row = column names
   const head=(rows[0]||[]).map(x=>String(x).trim());
   return rows.slice(1).filter(r=>r.some(v=>String(v).trim()!=='')).map(r=>{ const o=Object.create(null); head.forEach((k,i)=>{ if(k) o[k]=r[i]==null?'':r[i]; }); return o; });
 }
+
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{ d.querySelectorAll('details').forEach(x=>{ x.open=false; }); d.querySelectorAll('*').forEach(x=>{ if(x.scrollTop) x.scrollTop=0; }); }));
+// ---------- find, check, align, images, cable labels, draw.io ----------
+// show an object on any sheet: switch sheet, centre the view on it, select it
+function showObj(si,kind,id){
+  if(si!==state.cur) goSheet(si);
+  const o=kind==='node'?nodeById(id):kind==='zone'?zoneById(id):kind==='text'?textById(id):edgeById(id); if(!o) return;
+  let c;
+  if(kind==='edge'){ const A=absPort(o.a); if(!A) return; const B=isX(o)?null:absPort(o.b); c=B?{x:(A.x+B.x)/2,y:(A.y+B.y)/2}:A; }
+  else { const r=rectOf(kind,o); c={x:r.x+r.w/2,y:r.y+r.h/2}; }
+  const r=svg.getBoundingClientRect(), k=Math.max(.8,Math.min(1.25,view.k));
+  view={k,x:r.width/2-c.x*k,y:r.height/2-c.y*k}; multi=[]; pending=null; sel={kind,id}; render();
+}
+
+// --- find (Ctrl+F): devices, cable IDs, rooms, texts and connectors on all sheets
+let findHits=[], findAt=-1, findTimer=0;
+function findAll(q){
+  q=q.trim().toLowerCase(); if(!q) return [];
+  const has=v=>String(v==null?'':v).toLowerCase().includes(q), m=new Map(), add=h=>{ const k=h.si+'|'+h.kind+'|'+h.id, o=m.get(k); if(!o||h.rank<o.rank) m.set(k,h); };
+  forEachSheet((sh,i)=>{
+    state.edges.forEach(e=>{ const cid=cableId(e); if(has(cid)||has(e.cable)||has(e.notes)) add({si:i,kind:'edge',id:e.id,rank:cid.toLowerCase()===q?0:2}); });
+    state.nodes.forEach(n=>{ if(has(n.name)||has(n.model)||has(n.mfr)||has(n.notes)) add({si:i,kind:'node',id:n.id,rank:n.name.toLowerCase()===q?0:1});
+      else if(n.ports.some(p=>has(p.name))) add({si:i,kind:'node',id:n.id,rank:5}); });
+    (state.zones||[]).forEach(z=>{ if(has(z.name)) add({si:i,kind:'zone',id:z.id,rank:3}); });
+    (state.texts||[]).forEach(t=>{ if(has(t.text)) add({si:i,kind:'text',id:t.id,rank:4}); });
+  });
+  const cur=state.cur; return [...m.values()].sort((a,b)=>a.rank-b.rank||(a.si===cur?0:1)-(b.si===cur?0:1)||a.si-b.si);
+}
+function openFind(){ const fb=$('findBar'); fb.hidden=false; $('findBtn').setAttribute('aria-pressed','true'); const inp=$('findIn'); inp.focus(); inp.select(); if(inp.value.trim()) runFind(false); }
+function closeFind(){ $('findBar').hidden=true; $('findBtn').setAttribute('aria-pressed','false'); findHits=[]; findAt=-1; }
+function runFind(jump){ findHits=findAll($('findIn').value); findAt=findHits.length?0:-1; showFind(jump); }
+function showFind(jump){
+  const n=findHits.length, q=$('findIn').value.trim();
+  $('findCount').textContent=!q?'':n?(findAt+1)+' of '+n:'No match'; $('findPrev').disabled=$('findNext').disabled=n<2;
+  if(jump&&n){ const h=findHits[findAt]; showObj(h.si,h.kind,h.id); $('findIn').focus(); }
+}
+function stepFind(d){ if(!findHits.length){ runFind(true); return; } findAt=(findAt+d+findHits.length)%findHits.length; showFind(true); }
+$('findBtn').addEventListener('click',()=>{ if($('findBar').hidden) openFind(); else closeFind(); });
+$('findIn').addEventListener('input',()=>{ clearTimeout(findTimer); findTimer=setTimeout(()=>runFind(true),220); });
+$('findIn').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); clearTimeout(findTimer); if(findTimer&&!findHits.length) runFind(true); else stepFind(e.shiftKey?-1:1); findTimer=0; }
+  else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeFind(); }
+  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='f'){ e.preventDefault(); $('findIn').select(); }
+});
+$('findNext').addEventListener('click',()=>stepFind(1)); $('findPrev').addEventListener('click',()=>stepFind(-1)); $('findClose').addEventListener('click',closeFind);
+
+// --- check drawing: what looks unfinished
+let pdfChecked=false;
+const chkAutoOn=()=>{ try{ return localStorage.getItem('avlynx.checkpdf')!=='off'; }catch(e){ return true; } };
+function checkIssues(){
+  const out=[]; syncSheet(); const many=state.sheets.length>1, linked=new Set();
+  state.sheets.forEach(sh=>sheetArr(sh,'edges').forEach(e=>{ if(e.b&&e.b.s) linked.add(e.b.s+'|'+e.b.n); }));
+  const ids=new Map();
+  forEachSheet((sh,i)=>{
+    const where=many?' · '+sh.name:'', used=new Set(); state.edges.forEach(e=>{ used.add(e.a.n); if(!isX(e)) used.add(e.b.n); });
+    state.nodes.forEach(n=>{
+      if(!n.ports.length) out.push({si:i,kind:'node',id:n.id,text:'“'+n.name+'” has no connectors yet'+where});
+      else if(!used.has(n.id)&&!linked.has(sh.id+'|'+n.id)) out.push({si:i,kind:'node',id:n.id,text:'“'+n.name+'” is not connected'+where});
+    });
+    liveEdges().forEach(e=>{ const f=cableFlag(e); if(f) out.push({si:i,kind:'edge',id:e.id,text:'Cable '+cableId(e)+': '+f.note+where}); });
+    state.edges.forEach(e=>{ const c=cableId(e); if(c==='?') return; const l=ids.get(c)||[]; l.push({si:i,id:e.id}); ids.set(c,l); });
+  });
+  ids.forEach((l,c)=>{ if(l.length>1) out.push({si:l[1].si,kind:'edge',id:l[1].id,text:'Cable ID '+c+' is used '+l.length+' times'}); });
+  if(!String(state.doc.project||'').trim()) out.push({kind:'doc',text:'The title block has no project name'});
+  return out;
+}
+function openCheck(forPdf){
+  const list=checkIssues(); if(forPdf&&!list.length) return false;
+  closeMenus(); $('chkSum').textContent=list.length?(list.length===1?'One thing to look at':list.length+' things to look at')+'. Click an entry to show it.':'Nothing to fix: every device is connected and every cable ID is unique.';
+  const ul=$('chkList'); ul.replaceChildren(); ul.hidden=!list.length;
+  list.slice(0,200).forEach(x=>{ const b=h('button',{type:'button'}); b.append(h('span',{className:'warn',textContent:'!'}),x.text);
+    b.addEventListener('click',()=>{ $('chk').close(); if(x.kind==='doc') $('mProj').click(); else showObj(x.si,x.kind,x.id); }); ul.append(h('li',{},[b])); });
+  if(list.length>200) ul.append(h('li',{textContent:'… and '+(list.length-200)+' more'}));
+  $('chkPdf').hidden=!forPdf; $('chkAuto').checked=chkAutoOn(); $('chk').showModal(); return true;
+}
+$('chkBtn').addEventListener('click',()=>{ closeMenus(); openCheck(false); });
+$('chkClose').addEventListener('click',()=>$('chk').close());
+$('chkPdf').addEventListener('click',()=>{ $('chk').close(); pdfChecked=true; $('xPdf').click(); });
+$('chkAuto').addEventListener('change',e=>{ try{ localStorage.setItem('avlynx.checkpdf',e.target.checked?'on':'off'); }catch(err){} });
+
+// --- images: the sheet (or the selected area) as SVG or PNG, always in light colours
+const IMG_PROPS=['fill','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-dasharray','stroke-linecap','stroke-linejoin','opacity','font-family','font-size','font-weight','font-style','text-anchor','dominant-baseline','paint-order','letter-spacing'];
+const IMG_DROP='.hit,.phit,.halo,.zhit,.thit,.tsel,.glow,.flag,.fpill,.fbadge,.hdl,.hdlhit,.guide,.temp,title';
+function sheetSvg(){
+  const refs=selRefs(); let box=null;
+  if(refs.length){ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; const grow=(x,y)=>{ x0=Math.min(x0,x); y0=Math.min(y0,y); x1=Math.max(x1,x); y1=Math.max(y1,y); };
+    refs.forEach(r=>{ if(r.kind==='edge'){ const e=edgeById(r.id), A=e&&absPort(e.a), B=e&&!isX(e)&&absPort(e.b); if(A) grow(A.x,A.y); if(B) grow(B.x,B.y); return; }
+      const o=r.kind==='node'?nodeById(r.id):r.kind==='zone'?zoneById(r.id):textById(r.id); if(!o) return; const b=rectOf(r.kind,o); grow(b.x,b.y); grow(b.x+b.w,b.y+b.h); });
+    if(isFinite(x0)) box={x:x0,y:y0,width:x1-x0,height:y1-y0}; }
+  const keep={sel,multi,pending,activeType}, root=document.documentElement, th=root.getAttribute('data-theme');
+  sel=null; multi=[]; pending=null; activeType=null; root.setAttribute('data-theme','light'); EXPORTING=true;
+  try{
+    renderNow(); const b=box||world.getBBox(), M=24, vb=[Math.floor(b.x-M),Math.floor(b.y-M),Math.ceil(b.width+2*M),Math.ceil(b.height+2*M)];
+    const clone=world.cloneNode(true), src=[world,...world.querySelectorAll('*')], dst=[clone,...clone.querySelectorAll('*')];
+    for(let i=src.length-1;i>=1;i--){ const o=src[i], c=dst[i];
+      if(o.matches(IMG_DROP)||o.closest('#temp')){ c.remove(); continue; }
+      const cs=getComputedStyle(o); if(cs.display==='none'||cs.visibility==='hidden'||cs.opacity==='0'){ c.remove(); continue; }
+      [...c.attributes].forEach(a=>{ if(a.name==='class'||a.name==='id'||a.name.startsWith('data-')||a.name.startsWith('aria-')) c.removeAttribute(a.name); });
+      if(o.tagName==='g'){ if(cs.opacity!=='1') c.setAttribute('opacity',cs.opacity); continue; }
+      let st=''; IMG_PROPS.forEach(pn=>{ const v=cs.getPropertyValue(pn); if(v!=='') st+=pn+':'+v+';'; }); c.setAttribute('style',st);
+    }
+    clone.removeAttribute('transform'); clone.removeAttribute('id');
+    let inner=new XMLSerializer().serializeToString(clone), css='';
+    if(FONT_EMB){ [['legible','Atkinson Hyperlegible'],['mono','Atkinson Hyperlegible Mono']].forEach(([k,fam])=>{ if(FONT_EMB[k]&&inner.includes('&quot;'+fam+'&quot;')) css+=['n','b'].map(w=>'@font-face{font-family:"'+fam+'";font-weight:'+(w==='b'?700:400)+';src:url(data:font/ttf;base64,'+FONT_EMB[k][w]+')}').join(''); }); }
+    return {w:vb[2],h:vb[3],text:'<svg xmlns="http://www.w3.org/2000/svg" width="'+vb[2]+'" height="'+vb[3]+'" viewBox="'+vb.join(' ')+'">'+(css?'<style>'+css+'</style>':'')+'<rect x="'+vb[0]+'" y="'+vb[1]+'" width="'+vb[2]+'" height="'+vb[3]+'" fill="#ffffff"/>'+inner+'</svg>'};
+  } finally {
+    EXPORTING=false; if(th==null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme',th);
+    sel=keep.sel; multi=keep.multi; pending=keep.pending; activeType=keep.activeType; renderNow();
+  }
+}
+function imgName(ext){ const sh=state.sheets[state.cur]; return docName('drawing'+(state.sheets.length>1&&sh?'-'+(fclean(sh.name)||'sheet'):''),ext); }
+async function exportImage(fmt){
+  closeMenus(); syncSheet();
+  if(!state.nodes.length&&!(state.zones||[]).length&&!(state.texts||[]).length){ toast('This sheet is empty. Open a sheet with devices first.'); return; }
+  const im=sheetSvg();
+  if(fmt==='svg'){ saveFile(imgName('svg'),im.text,'image/svg+xml'); return; }
+  const sc=Math.min(2,8000/Math.max(im.w,im.h),Math.sqrt(32e6/(im.w*im.h))), cw=Math.max(1,Math.round(im.w*sc)), ch=Math.max(1,Math.round(im.h*sc));
+  const url=URL.createObjectURL(new Blob([im.text],{type:'image/svg+xml'})), img=new Image();
+  try{ img.src=url; await img.decode(); const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; const cx=cv.getContext('2d'); cx.fillStyle='#ffffff'; cx.fillRect(0,0,cw,ch); cx.drawImage(img,0,0,cw,ch);
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png')); if(!blob) throw new Error('png'); saveFile(imgName('png'),blob,'image/png'); }
+  catch(e){ toast('The image could not be created. Try the SVG image instead.'); }
+  finally{ URL.revokeObjectURL(url); }
+}
+$('xPng').addEventListener('click',()=>exportImage('png'));
+$('xSvg').addEventListener('click',()=>exportImage('svg'));
+
+// --- cable labels: one row per cable end, for label printer software
+function labelRows(){
+  const rows=[['Cable ID','End','Label line 1','Label line 2','This end','Other end','Signal','Cable type','Length']], list=[];
+  const push=(id,A,B,e)=>{ const ea=A.n.name+' · '+A.p.name, eb=B.n.name+' · '+B.p.name, sig=T[e.type]?T[e.type].label:e.type;
+    list.push([id,'A',id,'To: '+eb,ea,eb,sig,e.cable||'',e.len||''],[id,'B',id,'From: '+ea,eb,ea,sig,e.cable||'',e.len||'']); };
+  forEachSheet(sh=>{
+    liveEdges().forEach(e=>{ let a=e.a,b=e.b; if(portOf(a).dir==='in'&&portOf(b).dir==='out'){ a=e.b; b=e.a; } push(cableId(e),{n:nodeById(a.n),p:portOf(a)},{n:nodeById(b.n),p:portOf(b)},e); });
+    state.edges.forEach(e=>{ if(!isX(e)||!portOf(e.a)||!xPort(e.b)) return; let A={n:nodeById(e.a.n),p:portOf(e.a)}, B={n:xNode(e.b.s,e.b.n),p:xPort(e.b)}; if(A.p.dir==='in'&&B.p.dir==='out'){ const t=A; A=B; B=t; } push(cableId(e),A,B,e); });
+  });
+  list.sort((p,q)=>String(p[0]).localeCompare(String(q[0]),undefined,{numeric:true})||p[1].localeCompare(q[1]));
+  return rows.concat(list);
+}
+$('xCsvLb').addEventListener('click',()=>{ closeMenus(); if(!hasContent()) return; const rows=labelRows(); if(rows.length<2){ toast('There are no connections yet.'); return; } saveFile(docName('cable-labels','csv'),toCsv(rows),'text/csv'); });
+
+// --- draw.io diagram: one page per sheet; devices, connectors, cables with their route, rooms and texts
+const xa=v=>String(v==null?'':v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\r?\n/g,'&#10;');
+const hexOk=(c,d)=>/^#[0-9a-f]{6}$/i.test(c||'')?c:d;
+function drawioXml(){
+  const pages=[];
+  forEachSheet((sh,si)=>{
+    if(!state.nodes.length&&!(state.texts||[]).length&&!(state.zones||[]).length) return;
+    const cells=['<mxCell id="'+si+'_0"/>','<mxCell id="'+si+'_1" parent="'+si+'_0"/>'], P=(n,i)=>'p_'+n.id+'_'+i, G=v=>Math.round(v*10)/10, pre=si+'_'; // ids unique across pages
+    (state.zones||[]).forEach(z=>{ const c=hexOk(z.color,'#7a8794'); cells.push('<mxCell id="'+pre+'z_'+xa(z.id)+'" value="'+xa(z.name+(z.qty>1?' × '+z.qty:''))+'" style="rounded=1;arcSize=3;absoluteArcSize=1;whiteSpace=wrap;html=0;fillColor=none;strokeColor='+c+';fontColor='+c+';verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontStyle=1;fontSize=13;" vertex="1" parent="'+si+'_1"><mxGeometry x="'+G(z.x)+'" y="'+G(z.y)+'" width="'+G(z.w)+'" height="'+G(z.h)+'" as="geometry"/></mxCell>'); });
+    state.nodes.forEach(n=>{ const gg=geo(n), hc=hexOk(n.color,'#1b2430');
+      // a device is a group: white body, dark title bar and its connectors, so it moves as one piece in draw.io
+      cells.push('<mxCell id="'+pre+'n_'+xa(n.id)+'" value="" style="rounded=1;arcSize=8;absoluteArcSize=1;whiteSpace=wrap;html=0;fillColor=#ffffff;strokeColor=#9aa7b5;container=1;collapsible=0;recursiveResize=0;" vertex="1" parent="'+si+'_1"><mxGeometry x="'+G(n.x)+'" y="'+G(n.y)+'" width="'+W+'" height="'+G(gg.h)+'" as="geometry"/></mxCell>');
+      cells.push('<mxCell id="'+pre+'h_'+xa(n.id)+'" value="'+xa(n.name)+'" style="rounded=0;whiteSpace=wrap;html=0;fillColor='+hc+';strokeColor='+hc+';fontColor='+inkOn(hc)+';align=left;verticalAlign=middle;spacingLeft=10;fontStyle=1;fontSize=13;movable=0;resizable=0;connectable=0;" vertex="1" parent="'+pre+'n_'+xa(n.id)+'"><mxGeometry x="0" y="0" width="'+W+'" height="'+HEAD+'" as="geometry"/></mxCell>');
+      n.ports.forEach((p,i)=>{ const q=gg.pos[i], t=T[p.type]||T.hdmi, isIn=p.dir==='in';
+        cells.push('<mxCell id="'+pre+xa(P(n,i))+'" value="'+xa(p.name)+'" style="shape=ellipse;perimeter=ellipsePerimeter;aspect=fixed;fillColor='+t.color+';strokeColor=#ffffff;strokeWidth=2;fontSize=11;fontColor=#1b2430;html=0;verticalAlign=middle;labelPosition='+(isIn?'right':'left')+';align='+(isIn?'left':'right')+';spacing='+(isIn?4:4)+';movable=0;resizable=0;" vertex="1" parent="'+pre+'n_'+xa(n.id)+'"><mxGeometry x="'+G(q.x-6.5)+'" y="'+G(q.y-6.5)+'" width="13" height="13" as="geometry"/></mxCell>'); });
+    });
+    state.edges.forEach(e=>{ const t=T[e.type]||T.hdmi, na=nodeById(e.a.n); if(!na) return;
+      if(isX(e)){ const A=absPort(e.a), on=xNode(e.b.s,e.b.n), osh=sheetOf(e.b.s); if(!A||!on) return; const s1=portOf(e.a).dir==='in'?-1:1;
+        cells.push('<mxCell id="'+pre+'x_'+xa(e.id)+'" value="'+xa((s1<0?'← ':'→ ')+(osh?osh.name+': ':'')+on.name)+'" style="strokeColor=none;fillColor=none;html=0;align='+(s1<0?'right':'left')+';verticalAlign=middle;fontSize=11;fontColor='+t.color+';" vertex="1" parent="'+si+'_1"><mxGeometry x="'+G(s1<0?A.x-214:A.x+14)+'" y="'+G(A.y-10)+'" width="200" height="20" as="geometry"/></mxCell>'); return; }
+      const nb=nodeById(e.b.n); if(!nb) return; const A=absPort(e.a), B=absPort(e.b);
+      let pts=[]; if(routeOf(e)==='ortho'){ const o=orthoPts(e,A,B); if(o&&o.pts) pts=o.pts.map(q=>[q[0],q[1]]); if(pts.length&&Math.hypot(pts[0][0]-A.x,pts[0][1]-A.y)>Math.hypot(pts[0][0]-B.x,pts[0][1]-B.y)) pts.reverse(); pts=pts.slice(1,-1); }
+      const lab=state.doc.ids?cableId(e):'', style='edgeStyle=none;'+(routeOf(e)==='ortho'?'rounded=1;':'curved=1;')+'html=0;endArrow=none;startArrow=none;strokeWidth=2.5;strokeColor='+t.color+';'+(t.dash?'dashed=1;':'')+'fontSize=10;fontColor=#1b2430;labelBackgroundColor=#ffffff;';
+      cells.push('<mxCell id="'+pre+'e_'+xa(e.id)+'" value="'+xa(lab)+'" style="'+style+'" edge="1" parent="'+si+'_1" source="'+pre+xa(P(na,e.a.p))+'" target="'+pre+xa(P(nb,e.b.p))+'"><mxGeometry relative="1" as="geometry">'+(pts.length?'<Array as="points">'+pts.map(q=>'<mxPoint x="'+G(q[0])+'" y="'+G(q[1])+'"/>').join('')+'</Array>':'')+'</mxGeometry></mxCell>');
+    });
+    (state.texts||[]).forEach(t=>{ const b=tbox(t); cells.push('<mxCell id="'+pre+'t_'+xa(t.id)+'" value="'+xa(t.text)+'" style="strokeColor=none;fillColor=none;html=0;whiteSpace=wrap;align=left;verticalAlign=top;spacing=0;fontSize='+t.size+';fontStyle='+(t.bold?1:0)+';fontColor='+hexOk(t.color,'#1b2430')+';" vertex="1" parent="'+si+'_1"><mxGeometry x="'+G(b.x)+'" y="'+G(b.y)+'" width="'+G(b.w+8)+'" height="'+G(b.h)+'" as="geometry"/></mxCell>'); });
+    pages.push('<diagram id="'+xa(sh.id)+'" name="'+xa(sh.name)+'"><mxGraphModel grid="1" gridSize="12" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0"><root>'+cells.join('')+'</root></mxGraphModel></diagram>');
+  });
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<mxfile host="AVLYNX" agent="AVLYNX '+xa(APP.version)+'">'+pages.join('')+'</mxfile>\n';
+}
+$('xDrawio').addEventListener('click',()=>{ closeMenus(); if(!hasContent()) return; saveFile(docName('diagram','drawio'),drawioXml(),'application/xml'); });
 
 // ---------- export ----------
 const dlReady=(async()=>{ try{ return (window.claude&&window.claude.use)?await window.claude.use('downloads'):null; }catch(e){ return null; } })();
@@ -2994,16 +3200,22 @@ function rgb(hex){ const m=/^#?([0-9a-f]{6})$/i.exec(hex||''); const v=m?parseIn
 // The PDF fonts cover Western European characters only: replace the rest by a readable equivalent or a question mark.
 const PDF_MAP={'\u2026':'...','\u03a9':'Ohm','\u2126':'Ohm','\u2192':'->','\u2190':'<-','\u2194':'<->','\u2264':'<=','\u2265':'>=','\u2260':'!=','\u0141':'L','\u0142':'l','\u0110':'D','\u0111':'d','\u0131':'i','\u2033':'"','\u2032':"'",'\u2212':'-','\u2010':'-','\u2011':'-'};
 const PDF_OK='\u20ac\u201a\u201e\u201c\u201d\u2018\u2019\u2022\u2013\u2014\u2122\u2039\u203a';
-const pt=s=>String(s==null?'':s).replace(/[^\x00-\xff]/g,ch=>{ if(PDF_MAP[ch]!==undefined) return PDF_MAP[ch]; if(PDF_OK.includes(ch)) return ch; const d=ch.normalize('NFD').replace(/[\u0300-\u036f]/g,''); return /^[\x00-\xff]+$/.test(d)?d:'?'; });
+// with the embedded Atkinson Hyperlegible, the PDF also writes these Central and Eastern European letters
+const ATK_EXT='ĀāĂăĄąĆćĊċČčĎďĐđĒēĖėĘęĚěĞğĠġĢģĦħĪīĮįıĶķĻļĽľŁłŃńŅņŇňŐőŒœŔŕŘřŚśŞşŠšŢţŤťŪūŮůŰűŲųŸŹźŻżŽžȘșȚț';
+let PDF_UNI=false;
+const hf=(pdf,style)=>PDF_UNI?pdfFont(pdf,'legible',style==='bold'):pdf.setFont('helvetica',style);
+const pt=s=>String(s==null?'':s).replace(/[^\x00-\xff]/g,ch=>{ if(PDF_UNI&&ATK_EXT.includes(ch)) return ch; if(PDF_MAP[ch]!==undefined) return PDF_MAP[ch]; if(PDF_OK.includes(ch)) return ch; const d=ch.normalize('NFD').replace(/[\u0300-\u036f]/g,''); return /^[\x00-\xff]+$/.test(d)?d:'?'; });
 $('xPdf').addEventListener('click',()=>{
   closeMenus(); if(!hasContent()) return;
   if(!window.jspdf){ toast('The PDF library did not load. Check the connection and reload.'); return; }
+  if(!pdfChecked&&chkAutoOn()&&openCheck(true)) return; pdfChecked=false;
   syncSheet(); const d=state.doc, printed=state.sheets.filter(sh=>sh.nodes.length||(sh.texts||[]).length), total=printed.length; // one PDF page per sheet that contains devices or text
+  PDF_UNI=!!(FONT_EMB&&FONT_EMB.legible)&&[...JSON.stringify(projData())].some(ch=>ATK_EXT.includes(ch)); // letters the standard PDF font does not have: use the embedded font for the whole PDF
   const pdf=new window.jspdf.jsPDF({orientation:sheetOrient(printed[0]),unit:'mm',format:d.page||'a3'});
   let page=0, PW=0, PH=0;
   forEachSheet(sh=>{ if(!state.nodes.length&&!state.texts.length) return; if(page++) pdf.addPage(d.page||'a3',sheetOrient(sh));
   PW=pdf.internal.pageSize.getWidth(); PH=pdf.internal.pageSize.getHeight();
-  pdf.setFont('helvetica','bold'); pdf.setFontSize(8); const used=legendTypes(), lgT=pt(d.lgTitle||'Legend'), lgX0=10+3+pdf.getTextWidth(lgT)+6; pdf.setFont('helvetica','normal');
+  hf(pdf,'bold'); pdf.setFontSize(8); const used=legendTypes(), lgT=pt(d.lgTitle||'Legend'), lgX0=10+3+pdf.getTextWidth(lgT)+6; hf(pdf,'normal');
   const lgRows=[[]]; { let lx=lgX0; used.forEach(t=>{ const w=10+pdf.getTextWidth(t.label)+6; if(lx+w>PW-10-2&&lgRows[lgRows.length-1].length){ lgRows.push([]); lx=lgX0; } lgRows[lgRows.length-1].push(t); lx+=w; }); }
   const M=10, TB=24, LG=(d.legend&&(used.length||d.lgNotes))?9+6*(lgRows.length-1):0, ink=[27,36,48], grey=[120,132,146], brand=rgb(d.accent);
   const tbY=PH-M-TB, lgY=tbY-LG;
@@ -3015,7 +3227,7 @@ $('xPdf').addEventListener('click',()=>{
   (state.zones||[]).forEach(z=>{
     const c=z.color?rgb(z.color):grey; pdf.setDrawColor(...c); pdf.setFillColor(...c.map(v=>Math.round(255-(255-v)*.07))); pdf.setLineWidth(Math.max(.2,1.6*s)); pdf.setLineDashPattern([9*s,6*s],0);
     pdf.roundedRect(X(z.x),Y(z.y),z.w*s,z.h*s,10*s,10*s,'FD'); pdf.setLineDashPattern([],0);
-    pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(13)); pdf.setTextColor(...c); pdf.text(pt(cut(z.name,40)+(z.qty>1?' x '+z.qty:'')),X(z.x+12),Y(z.y+21));
+    hf(pdf,'bold'); pdf.setFontSize(fs(13)); pdf.setTextColor(...c); pdf.text(pt(cut(z.name,40)+(z.qty>1?' x '+z.qty:'')),X(z.x+12),Y(z.y+21));
   });
   const R=routes(), stroke=ops=>{ const segs=[]; let px=ops[0][1],py=ops[0][2];
     ops.slice(1).forEach(o=>{ if(o[0]==='L'){ segs.push([(o[1]-px)*s,(o[2]-py)*s]); px=o[1]; py=o[2]; } else { segs.push([(o[1]-px)*s,(o[2]-py)*s,(o[3]-px)*s,(o[4]-py)*s,(o[5]-px)*s,(o[6]-py)*s]); px=o[5]; py=o[6]; } });
@@ -3025,7 +3237,7 @@ $('xPdf').addEventListener('click',()=>{
   liveEdges().forEach(e=>{
     const r=R.get(e.id), ops=r.ops, t=T[e.type];
     if(r.ref){ later.push(()=>{
-      pdf.setLineDashPattern([],0); pdf.setFont('helvetica','normal'); pdf.setFontSize(fs(9.5));
+      pdf.setLineDashPattern([],0); hf(pdf,'normal'); pdf.setFontSize(fs(9.5));
       refTags(e,r.A,r.B).forEach(tg=>{
         const txt=pt(tg.text), w=pdf.getTextWidth(txt)+12*s, x0=X(tg.x)+tg.s*14*s, bx=tg.s>0?x0:x0-w, y=Y(tg.y);
         pdf.setDrawColor(...rgb(t.color)); pdf.setLineWidth(2.6*s); pdf.line(X(tg.x),y,x0,y);
@@ -3038,16 +3250,16 @@ $('xPdf').addEventListener('click',()=>{
     pdf.setDrawColor(...rgb(t.color)); pdf.setLineWidth(2.6*s); pdf.setLineDashPattern(t.dash?t.dash.split(' ').map(v=>v*s):[],0); stroke(ops);
   });
   xl().forEach(x=>later.push(()=>{
-    const t=T[x.e.type], tg=xTagOf(x); pdf.setFont('helvetica','normal'); pdf.setFontSize(fs(9.5));
+    const t=T[x.e.type], tg=xTagOf(x); hf(pdf,'normal'); pdf.setFontSize(fs(9.5));
     const txt=pt(tg.text), w=pdf.getTextWidth(txt)+12*s, x0=X(tg.x)+tg.s*14*s, bx=tg.s>0?x0:x0-w, y=Y(tg.y);
     pdf.setDrawColor(...rgb(t.color)); pdf.setLineWidth(2.6*s); pdf.setLineDashPattern(t.dash?t.dash.split(' ').map(v=>v*s):[],0); pdf.line(X(tg.x),y,x0,y);
     pdf.setFillColor(255,255,255); pdf.setLineWidth(1.6*s); pdf.setLineDashPattern([5*s,3*s],0); pdf.roundedRect(bx,y-9*s,w,18*s,4*s,4*s,'FD'); pdf.setLineDashPattern([],0);
     pdf.setTextColor(27,36,48); pdf.text(txt,bx+6*s,y,{baseline:'middle'});
   }));
   pdf.setLineDashPattern([],0);
-  (R.bundles||[]).forEach(b=>{ const t=T[b.type]||T.hdmi; pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(10)); const txt=b.n+' x', w=pdf.getTextWidth(txt)+12*s;
+  (R.bundles||[]).forEach(b=>{ const t=T[b.type]||T.hdmi; hf(pdf,'bold'); pdf.setFontSize(fs(10)); const txt=b.n+' x', w=pdf.getTextWidth(txt)+12*s;
     pdf.setFillColor(255,255,255); pdf.setDrawColor(...rgb(t.color)); pdf.setLineWidth(1.6*s); pdf.roundedRect(X(b.x)-w/2,Y(b.y)-8*s,w,16*s,8*s,8*s,'FD'); pdf.setTextColor(27,36,48); pdf.text(txt,X(b.x),Y(b.y),{baseline:'middle',align:'center'}); });
-  if(d.ids){ pdf.setFont('helvetica','normal'); pdf.setFontSize(fs(9.5)); liveEdges().forEach(e=>{
+  if(d.ids){ hf(pdf,'normal'); pdf.setFontSize(fs(9.5)); liveEdges().forEach(e=>{
     const m=R.get(e.id).mid; if(!m) return; const id=pt(cableId(e)), tw=pdf.getTextWidth(id)+2.4*s*2, th=13*s;
     pdf.setFillColor(255,255,255); pdf.rect(X(m.x)-tw/2,Y(m.y)-th/2,tw,th,'F');
     pdf.setTextColor(...ink); pdf.text(id,X(m.x),Y(m.y),{align:'center',baseline:'middle'});
@@ -3056,10 +3268,10 @@ $('xPdf').addEventListener('click',()=>{
     const gg=geo(n), x=X(n.x), y=Y(n.y), w=W*s, r=8*s;
     pdf.setFillColor(255,255,255); pdf.setDrawColor(...grey); pdf.setLineWidth(Math.max(.15,(n.byOthers?1.6:1.2)*s));
     if(n.byOthers) pdf.setLineDashPattern([6*s,4*s],0); pdf.roundedRect(x,y,w,gg.h*s,r,r,'FD'); pdf.setLineDashPattern([],0);
-    if(n.byOthers){ pdf.setFont('helvetica','italic'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...grey); pdf.text('Supplied by others',x+4*s,y+(gg.h+15)*s); }
+    if(n.byOthers){ hf(pdf,'italic'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...grey); pdf.text('Supplied by others',x+4*s,y+(gg.h+15)*s); }
     pdf.setFillColor(...(n.color?rgb(n.color):ink)); pdf.roundedRect(x,y,w,HEAD*s,r,r,'F'); pdf.rect(x,y+HEAD*s-r,w,r,'F');
-    pdf.setTextColor(...(n.color?rgb(inkOn(n.color)):[255,255,255])); pdf.setFont('helvetica','bold'); pdf.setFontSize(fs(13)); pdf.text(pt(cut(n.name,22)),x+12*s,y+21*s);
-    pdf.setFont('helvetica','normal'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...ink);
+    pdf.setTextColor(...(n.color?rgb(inkOn(n.color)):[255,255,255])); hf(pdf,'bold'); pdf.setFontSize(fs(13)); pdf.text(pt(cut(n.name,22)),x+12*s,y+21*s);
+    hf(pdf,'normal'); pdf.setFontSize(fs(11.5)); pdf.setTextColor(...ink);
     n.ports.forEach((p,i)=>{
       const q=gg.pos[i], cx=x+q.x*s, cy=y+q.y*s, isIn=p.dir==='in';
       pdf.text(pt(cut(p.name,13)),isIn?x+14*s:x+w-14*s,cy+4*s,{align:isIn?'left':'right'});
@@ -3074,14 +3286,14 @@ $('xPdf').addEventListener('click',()=>{
   // frame, legend strip, title block
   pdf.setDrawColor(...ink); pdf.setLineWidth(.35); pdf.rect(M,M,PW-2*M,PH-2*M);
   if(LG){
-    pdf.line(M,lgY,PW-M,lgY); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.setTextColor(...ink); pdf.text(lgT,M+3,lgY+5.7);
-    let lx=lgX0; pdf.setFont('helvetica','normal'); pdf.setLineWidth(1);
+    pdf.line(M,lgY,PW-M,lgY); hf(pdf,'bold'); pdf.setFontSize(8); pdf.setTextColor(...ink); pdf.text(lgT,M+3,lgY+5.7);
+    let lx=lgX0; hf(pdf,'normal'); pdf.setLineWidth(1);
     lgRows.forEach((row,ri)=>{ lx=lgX0; const ry=lgY+6*ri; row.forEach(t=>{ pdf.setDrawColor(...rgb(t.color)); pdf.setLineDashPattern(t.dash?t.dash.split(' ').map(v=>v*.25):[],0); pdf.line(lx,ry+4.6,lx+8,ry+4.6); pdf.text(t.label,lx+10,ry+5.7); lx+=10+pdf.getTextWidth(t.label)+6; }); });
     const lgLast=lgY+6*(lgRows.length-1);
     pdf.setLineDashPattern([],0);
     if(d.lgNotes&&PW-M-lx>30){ pdf.setTextColor(...grey); pdf.text(fitText(d.lgNotes,PW-M-lx-3),lx,lgLast+5.7); pdf.setTextColor(...ink); }
   }
-  pdf.setFont('helvetica','normal'); pdf.setFontSize(6); pdf.setTextColor(...grey); pdf.text('Created with '+APP.name,PW-M,PH-M+3.4,{align:'right'});
+  hf(pdf,'normal'); pdf.setFontSize(6); pdf.setTextColor(...grey); pdf.text('Created with '+APP.name,PW-M,PH-M+3.4,{align:'right'});
   pdf.setProperties({title:d.title||d.project||'AV system diagram',author:d.by||d.company||'',creator:APP.name+' by '+APP.author});
   pdf.setDrawColor(...ink); pdf.setLineWidth(.35); pdf.line(M,tbY,PW-M,tbY);
   pdf.setFillColor(...brand); pdf.rect(M,tbY,PW-2*M,1.2,'F');
@@ -3089,18 +3301,18 @@ $('xPdf').addEventListener('click',()=>{
   if(d.logo&&d.logoW&&d.logoH){
     const mw=coW-8, mh=d.company?11:16, k=Math.min(mw/d.logoW,mh/d.logoH), lw=d.logoW*k, lh=d.logoH*k;
     try{ pdf.addImage(d.logo,/^data:image\/png/.test(d.logo)?'PNG':'JPEG',M+4,tbY+4+(mh-lh)/2,lw,lh); }catch(e){}
-    if(d.company){ pdf.setFont('helvetica','bold'); pdf.setFontSize(9); pdf.setTextColor(...ink); pdf.text(fitText(d.company,coW-8),M+4,tbY+20.5); }
+    if(d.company){ hf(pdf,'bold'); pdf.setFontSize(9); pdf.setTextColor(...ink); pdf.text(fitText(d.company,coW-8),M+4,tbY+20.5); }
   } else {
-    pdf.setFont('helvetica','bold'); pdf.setFontSize(13); pdf.setTextColor(...ink); { const ct=pt(d.company||'AV system diagram'), tw=pdf.getTextWidth(ct); if(tw>coW-8) pdf.setFontSize(Math.max(8,13*(coW-8)/tw)); } pdf.text(fitText(d.company||'AV system diagram',coW-8),M+4,tbY+11.5); // narrow pages: smaller type before cutting
-    pdf.setFont('helvetica','normal'); pdf.setFontSize(8); pdf.setTextColor(...grey); if(d.company) pdf.text('AV system diagram',M+4,tbY+17);
+    hf(pdf,'bold'); pdf.setFontSize(13); pdf.setTextColor(...ink); { const ct=pt(d.company||'AV system diagram'), tw=pdf.getTextWidth(ct); if(tw>coW-8) pdf.setFontSize(Math.max(8,13*(coW-8)/tw)); } pdf.text(fitText(d.company||'AV system diagram',coW-8),M+4,tbY+11.5); // narrow pages: smaller type before cutting
+    hf(pdf,'normal'); pdf.setFontSize(8); pdf.setTextColor(...grey); if(d.company) pdf.text('AV system diagram',M+4,tbY+17);
   }
   const several=total>1, cells=[[.34,['Project',d.project],['Drawing title',several?[d.title,sh.name].filter(Boolean).join(' \u2013 '):d.title]],[.28,['Customer',d.customer],['Site / room',d.site]],[.16,['Drawing no.',d.number],[several?'Revision / sheet':'Revision',several?(d.rev||'\u2013')+' / '+page+' of '+total:d.rev]],[.22,['Drawn by',d.by],['Date',d.date]]];
   let cx=M+coW;
   cells.forEach(([f,p1,p2])=>{
     const cw=rest*f; pdf.setDrawColor(...ink); pdf.setLineWidth(.2); pdf.line(cx,tbY+1.2,cx,PH-M);
     [[p1,5.2,9.8],[p2,15.4,20]].forEach(([p,ly,vy])=>{
-      pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5); pdf.setTextColor(...grey); pdf.text(p[0],cx+3,tbY+ly);
-      pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(...ink); pdf.text(fitText(p[1]||'–',cw-6),cx+3,tbY+vy);
+      hf(pdf,'normal'); pdf.setFontSize(6.5); pdf.setTextColor(...grey); pdf.text(p[0],cx+3,tbY+ly);
+      hf(pdf,'bold'); pdf.setFontSize(10); pdf.setTextColor(...ink); pdf.text(fitText(p[1]||'–',cw-6),cx+3,tbY+vy);
     });
     cx+=cw;
   });
@@ -3112,6 +3324,7 @@ $('xPdf').addEventListener('click',()=>{
 const PKEY='avlynx.projects.v1';
 function projList(){ try{ const a=JSON.parse(localStorage.getItem(PKEY)); return (Array.isArray(a)?a:[]).filter(p=>p&&typeof p.id==='string'&&p.data&&(Array.isArray(p.data.nodes)||Array.isArray(p.data.sheets))).map(p=>Object.assign(p,{name:typeof p.name==='string'&&p.name?p.name:'Untitled project',saved:isFinite(p.saved)?+p.saved:0})); }catch(e){ return []; } }
 const projName=()=>state.doc.project||state.doc.title||'Untitled project';
+let pjNameTimer=0;
 const projData=()=>{ syncSheet(); return {app:APP.name,type:'project',version:2,doc:state.doc,cur:state.cur,sheets:state.sheets.map(sh=>Object.assign({id:sh.id,name:sh.name,nodes:sh.nodes,edges:sh.edges,zones:sh.zones,texts:sh.texts||[]},sh.orient?{orient:sh.orient}:{}))}; };
 const devCount=d=>Array.isArray(d.sheets)?d.sheets.reduce((a,sh)=>a+((sh&&sh.nodes)||[]).length,0):(d.nodes||[]).length;
 function pMsg(t,bad){ const m=$('pMsg'); m.textContent=t||''; m.style.color=bad?'var(--danger)':'var(--muted)'; }
@@ -3172,7 +3385,9 @@ function checkProject(o){
     const o2=sheets.find(x=>x.id===e.b.s); if(!o2||o2===sh||typeof e.id!=='string'||!Number.isInteger(e.a.p)||!Number.isInteger(e.b.p)) return;
     const na=sh.nodes.find(n=>n.id===e.a.n), nb=o2.nodes.find(n=>n.id===e.b.n), pa=na&&na.ports[e.a.p], pb=nb&&nb.ports[e.b.p]; if(!pa||!pb||!compat(pa.type,pb.type)) return;
     const c={id:e.id,a:{n:e.a.n,p:e.a.p},b:{n:e.b.n,p:e.b.p,s:o2.id},type:linkType(pa.type,pb.type)}; ['label','cable','len','notes'].forEach(k=>{ if(typeof e[k]==='string') c[k]=e[k]; }); sh.edges.push(c); }); });
-  return {sheets,cur:Math.min(Math.max(0,o.cur|0),sheets.length-1),doc:cleanDoc(o.doc)};
+  const doc=cleanDoc(o.doc);
+  if(doc.route==='curve'){ sheets.forEach(sh=>sh.edges.forEach(e=>{ if(e.route!=='ortho') e.route='curve'; })); doc.route='ortho'; } // the switch for all lines is gone: curved lines of older projects stay curved, one by one
+  return {sheets,cur:Math.min(Math.max(0,o.cur|0),sheets.length-1),doc};
 }
 function loadProject(o,pid){ const p=checkProject(clone(o)); state.sheets=p.sheets; useSheet(p.cur); state.doc=p.doc; state.pid=pid||null; sel=null; multi=[]; pending=null; persist(); resetHistory(); renderSheets(); fit(); setTimeout(adapterNote,400); }
 function blankProject(keepDoc){ state.sheets=[{id:uid('s'),name:'Sheet 1',nodes:[],edges:[],zones:[],texts:[]}]; useSheet(0); state.doc=Object.assign(DOC0(),keepDoc||{}); state.pid=null; sel=null; multi=[]; pending=null; persist(); resetHistory(); renderSheets(); fit(); }
@@ -3202,18 +3417,22 @@ function setSheetOrient(v){ const sh=state.sheets[state.cur]; if(v===(state.doc.
 function sheetMenu(anchor){ const o=sheetOrient(state.sheets[state.cur]); popMenu(0,0,[{label:'Rename',fn:renameSheet},{label:'Duplicate',fn:dupSheet},null,{label:'Landscape page',check:o==='landscape',fn:()=>setSheetOrient('landscape')},{label:'Portrait page',check:o==='portrait',fn:()=>setSheetOrient('portrait')},null,{label:'Delete sheet',danger:true,on:state.sheets.length>1,confirm:'Delete “'+cut(state.sheets[state.cur].name,20)+'”? '+TAP+' again',fn:delSheet}],anchor); }
 function guard(btn,label,fn){
   btn.addEventListener('click',()=>{
-    if(!anyContent()||btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; fn(); return; }
-    btn.dataset.armed='1'; btn.textContent='Replace current drawing?';
+    if(!unsaved()||btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; fn(); return; }
+    btn.dataset.armed='1'; btn.textContent='Discard unsaved changes?';
     setTimeout(()=>{ if(btn.dataset.armed){ delete btn.dataset.armed; btn.textContent=label; } },3500);
   });
 }
+const projSig=()=>{ const d=projData(), t=JSON.stringify({doc:d.doc,sheets:d.sheets}); let x=2166136261; for(let i=0;i<t.length;i++){ x^=t.charCodeAt(i); x=Math.imul(x,16777619); } return (x>>>0).toString(36)+t.length; };
+const unsaved=()=>anyContent()&&projSig()!==state.savedSig;
+function markSaved(){ state.savedSig=projSig(); persist(); }
+function pjStateText(){ const e=state.pid&&projList().find(p=>p.id===state.pid); $('pjState').textContent=!anyContent()?'Empty drawing':unsaved()?(e?'Changes since the last save':'Not saved yet'):e?'Saved in this browser, '+new Date(e.saved).toLocaleString():'Saved'; }
 function renderProjects(){
-  $('pjCur').textContent=projName();
+  const nm=$('pjName'); if(document.activeElement!==nm) nm.value=state.doc.project||''; pjStateText();
   const box=$('pList'), list=projList().sort((a,b)=>b.saved-a.saved); box.replaceChildren();
   if(!list.length) box.appendChild(h('p',{textContent:'No projects saved yet.',style:'margin:0; color:var(--muted)'}));
   list.forEach(p=>{
     const open=h('button',{type:'button',textContent:'Open'}), del=h('button',{type:'button',className:'danger',textContent:'Delete'});
-    guard(open,'Open',()=>{ try{ loadProject(p.data,p.id); $('projects').close(); toast('Opened “'+p.name+'”'); }catch(x){ pMsg(x.message,true); } });
+    guard(open,'Open',()=>{ try{ loadProject(p.data,p.id); markSaved(); $('projects').close(); toast('Opened “'+p.name+'”'); }catch(x){ pMsg(x.message,true); } });
     armed(del,'Delete',()=>{ try{ localStorage.setItem(PKEY,JSON.stringify(projList().filter(x=>x.id!==p.id))); }catch(e){} if(state.pid===p.id){ state.pid=null; persist(); } renderProjects(); });
     const info=h('div',{className:'mmain'},[p.name+(p.id===state.pid?' (current)':''),h('small',{textContent:new Date(p.saved).toLocaleString()+' · '+devCount(p.data)+' devices'+(Array.isArray(p.data.sheets)&&p.data.sheets.length>1?' on '+p.data.sheets.length+' sheets':'')})]);
     box.appendChild(h('div',{className:'mrow'},[info,h('div',{className:'mact'},[open,del])]));
@@ -3225,20 +3444,19 @@ function saveInBrowser(){
   const list=projList(), id=state.pid&&list.some(p=>p.id===state.pid)?state.pid:uid('p'), entry={id,name:projName(),saved:Date.now(),data:clone(projData())};
   try{ localStorage.setItem(PKEY,JSON.stringify(list.filter(p=>p.id!==id).concat(entry))); }
   catch(e){ pMsg('The browser storage is full. Save the project as a file instead.',true); return null; }
-  state.pid=id; persist(); return entry;
+  state.pid=id; markSaved(); return entry;
 }
-$('pSave').addEventListener('click',()=>{ const en=saveInBrowser(); if(en){ pMsg('Saved “'+en.name+'” in this browser.'); renderProjects(); } });
-$('pFile').addEventListener('click',()=>saveFile(baseName()+'_'+stampName(true)+'.avlynx.json',JSON.stringify(projData(),null,1),'application/json'));
-guard($('pNew'),'New project',()=>{
-  const keep={}; ['company','accent','logo','logoW','logoH','page','legend','ids','route','lgTitle','lgNotes','lgLogo','lgDetails','lgAll'].forEach(k=>{ keep[k]=state.doc[k]; });
-  blankProject(keep); renderProjects(); pMsg('Started a new, empty project.');
-});
-guard($('pOpen'),'Open file',()=>$('pInput').click());
+$('pSave').addEventListener('click',()=>{ const en=saveInBrowser(); if(en){ pMsg(''); renderProjects(); toast('Saved “'+en.name+'” in this browser'); } });
+$('pFile').addEventListener('click',()=>{ saveFile(baseName()+'_'+stampName(true)+'.avlynx.json',JSON.stringify(projData(),null,1),'application/json'); markSaved(); pjStateText(); });
+$('pjName').addEventListener('input',()=>{ state.doc.project=$('pjName').value.slice(0,200); clearTimeout(pjNameTimer); pjNameTimer=setTimeout(()=>{ persist(); render(); pjStateText(); },250); });
+const keepForNew=()=>{ const keep={}; ['company','accent','logo','logoW','logoH','page','orient','legend','ids','by','lgTitle','lgNotes','lgLogo','lgDetails','lgAll'].forEach(k=>{ if(state.doc[k]!==undefined) keep[k]=state.doc[k]; }); return keep; };
+guard($('pNew'),'New project',()=>{ blankProject(keepForNew()); renderProjects(); pMsg('Started a new, empty project. Company details and page settings were kept.'); $('pjName').focus(); });
+guard($('pOpen'),'Open file…',()=>$('pInput').click());
 $('pInput').addEventListener('change',()=>{
   const f=$('pInput').files[0]; if(!f) return; if(f.size>MAX_FILE){ pMsg('This file is larger than 20 MB.',true); $('pInput').value=''; return; } const rd=new FileReader();
   rd.onerror=()=>pMsg('The file could not be read.',true);
   rd.onload=()=>{
-    try{ loadProject(JSON.parse(rd.result),null); $('projects').close(); toast('Opened '+f.name); }
+    try{ loadProject(JSON.parse(rd.result),null); markSaved(); $('projects').close(); toast('Opened '+f.name); }
     catch(x){ pMsg(x instanceof SyntaxError?'This file cannot be read as an AVLYNX project.':x.message,true); }
     $('pInput').value='';
   };
@@ -3380,23 +3598,22 @@ if(state.libBase) Object.keys(state.libBase).forEach(k=>{ if(typeof state.libBas
 if(!state.libBase&&BAKED&&state.libStamp===BAKED.stamp) state.libBase=baseOf(BAKED.groups);
 if(stored&&BAKED) offerUpdate({stamp:BAKED.stamp,groups:BAKED.groups,retired:BAKED.retired});
 checkLibraryFile(!stored);
-if(state.lib[0]) openBrands.add(state.lib[0].name); // the first group starts open
 syncSheet(); renderLib(); renderSheets(); resetHistory(); showUndo();
 requestAnimationFrame(fit);
 if(stored&&!(state.pairV>=2)){ state.pairV=2; persist(); setTimeout(adapterNote,600); }
 window.addEventListener('resize',()=>render());
 { // welcome: continue, start empty, open a project or look at the example
-  const had=anyContent(), wl=$('welcome'), close=()=>wl.close(), page=()=>({page:state.doc.page,orient:state.doc.orient});
+  const had=anyContent(), wl=$('welcome'), close=()=>wl.close();
   $('wlVersion').textContent='Version '+APP.version+(EDITION?' \u00b7 '+EDITION:'')+' \u00b7 Created by '+APP.author;
   $('wlContinue').hidden=!had; if(!had) $('wlNew').classList.add('primary');
   wl.addEventListener('cancel',e=>e.preventDefault());
   $('wlContinue').addEventListener('click',close);
   const fresh=(btn,label,fn)=>btn.addEventListener('click',()=>{
-    if(!had||btn.dataset.armed){ fn(); close(); return; }
-    btn.dataset.armed='1'; btn.textContent='Discard the last drawing?'; setTimeout(()=>{ delete btn.dataset.armed; btn.textContent=label; },3500);
+    if(!unsaved()||btn.dataset.armed){ fn(); close(); return; }
+    btn.dataset.armed='1'; btn.textContent='Discard unsaved changes?'; setTimeout(()=>{ delete btn.dataset.armed; btn.textContent=label; },3500);
   });
-  fresh($('wlNew'),'New drawing',()=>blankProject(page()));
-  fresh($('wlExample'),'Show the example',()=>{ blankProject(page()); const ex=example(); state.nodes=ex.nodes; state.edges=ex.edges; state.zones=ex.zones||[]; sel=null; persist(); resetHistory(); fit(); });
+  fresh($('wlNew'),'New project',()=>blankProject(keepForNew()));
+  fresh($('wlExample'),'Show the example',openExample);
   $('wlOpen').addEventListener('click',()=>{ close(); pMsg(''); renderProjects(); $('projects').showModal(); });
   wl.showModal(); (had?$('wlContinue'):$('wlNew')).focus();
 }
